@@ -1,48 +1,92 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import { View, Text, TextInput, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import type { TranscriptEntry } from '../types';
 
-export default function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
+interface Props {
+  entry: TranscriptEntry;
+  onEdit?: (id: string, newSpanish: string) => void;
+}
+
+export default function TranscriptMessage({ entry, onEdit }: Props) {
   const isProvider = entry.role === 'provider';
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(entry.originalText);
+
+  useEffect(() => {
+    setDraft(entry.originalText);
+  }, [entry.originalText]);
+
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        friction: 8,
-        tension: 40,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.spring(slideAnim, { toValue: 0, friction: 8, tension: 40, useNativeDriver: true }),
     ]).start();
   }, []);
+
+  function commitEdit() {
+    setEditing(false);
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== entry.originalText) {
+      onEdit?.(entry.id, trimmed);
+    }
+  }
+
+  // For patient entries:
+  //   originalText = what they said in Spanish
+  //   translatedText = English translation shown to doctor
+  // For provider entries:
+  //   originalText = what they said in English
+  //   translatedText = Spanish translation played to patient
 
   return (
     <Animated.View
       style={[
         styles.container,
         isProvider ? styles.containerProvider : styles.containerPatient,
-        {
-          opacity: fadeAnim,
-          transform: [{ translateY: slideAnim }],
-        },
+        { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
       ]}
     >
       <View style={[styles.bubble, isProvider ? styles.bubbleProvider : styles.bubblePatient]}>
-        {/* The Translated Text (Main Focus) */}
+        {/* Main translated text */}
         <Text style={styles.translatedText}>{entry.translatedText}</Text>
-        
-        {/* Original Spoken Text (Smaller) */}
+
+        {/* Original spoken text — editable for patient entries */}
         <View style={styles.originalContainer}>
-          <Text style={styles.originalLabel}>{isProvider ? 'You said (EN)' : 'They said (ES)'}</Text>
-          <Text style={styles.originalText}>{entry.originalText}</Text>
+          <View style={styles.originalLabelRow}>
+            <Text style={styles.originalLabel}>
+              {isProvider ? 'You said (EN)' : 'They said (ES)'}
+            </Text>
+            {!isProvider && onEdit && !editing && (
+              <TouchableOpacity onPress={() => setEditing(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Text style={styles.editIcon}>✏️</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {editing ? (
+            <View style={styles.editInputWrap}>
+              <TextInput
+                style={styles.editInput}
+                value={draft}
+                onChangeText={setDraft}
+                multiline
+                autoFocus
+                onSubmitEditing={commitEdit}
+                blurOnSubmit
+                onBlur={commitEdit}
+                placeholderTextColor="rgba(255,255,255,0.3)"
+              />
+              <TouchableOpacity style={styles.doneBtn} onPress={commitEdit}>
+                <Text style={styles.doneBtnText}>Re-translate</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <Text style={styles.originalText}>{entry.originalText}</Text>
+          )}
         </View>
       </View>
     </Animated.View>
@@ -55,12 +99,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     flexDirection: 'row',
   },
-  containerProvider: {
-    justifyContent: 'flex-end',
-  },
-  containerPatient: {
-    justifyContent: 'flex-start',
-  },
+  containerProvider: { justifyContent: 'flex-end' },
+  containerPatient: { justifyContent: 'flex-start' },
   bubble: {
     maxWidth: '85%',
     borderRadius: 24,
@@ -91,18 +131,53 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
     paddingTop: 10,
   },
+  originalLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
   originalLabel: {
     fontSize: 10,
     fontWeight: '800',
     color: 'rgba(255, 255, 255, 0.4)',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 4,
   },
+  editIcon: { fontSize: 13 },
   originalText: {
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.6)',
     fontStyle: 'italic',
     lineHeight: 20,
+  },
+  editInputWrap: { gap: 8 },
+  editInput: {
+    fontSize: 14,
+    color: '#fff',
+    fontStyle: 'italic',
+    lineHeight: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(48, 209, 88, 0.5)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(48, 209, 88, 0.08)',
+    minHeight: 40,
+  },
+  doneBtn: {
+    alignSelf: 'flex-end',
+    backgroundColor: 'rgba(48, 209, 88, 0.2)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: 'rgba(48, 209, 88, 0.4)',
+  },
+  doneBtnText: {
+    color: '#30D158',
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
 });

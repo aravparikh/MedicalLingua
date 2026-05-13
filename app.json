@@ -15,7 +15,11 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.medlingua.app"
+      "bundleIdentifier": "com.medlingua.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "MedLingua needs the microphone to translate your medical consultation in real time.",
+        "NSSpeechRecognitionUsageDescription": "MedLingua uses speech recognition to transcribe the consultation."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -38,7 +42,8 @@
         {
           "microphonePermission": "Allow Lingua to access the microphone for speech recognition."
         }
-      ]
+      ],
+      "@twilio/voice-react-native-sdk"
     ]
   }
 }

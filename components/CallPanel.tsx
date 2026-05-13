@@ -9,6 +9,7 @@ interface Props {
   isSpeaker: boolean;
   callStartedAt: number;
   dialedNumber?: string;
+  callStatus?: 'idle' | 'connecting' | 'connected' | 'failed';
   onClearChat: () => void;
   onEndCall: () => void;
   onToggleMute: () => void;
@@ -22,6 +23,7 @@ export default function CallPanel({
   isSpeaker,
   callStartedAt,
   dialedNumber,
+  callStatus,
   onClearChat,
   onEndCall,
   onToggleMute,
@@ -71,9 +73,17 @@ export default function CallPanel({
           </TouchableOpacity>
         </View>
 
-        {/* Dialed number if present */}
+        {/* Dialed number + call status */}
         {displayNumber && (
-          <Text style={styles.dialedNumber}>{displayNumber}</Text>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={styles.dialedNumber}>{displayNumber}</Text>
+            {callStatus === 'connecting' && (
+              <Text style={styles.callStatusText}>Connecting…</Text>
+            )}
+            {callStatus === 'failed' && (
+              <Text style={[styles.callStatusText, { color: '#FF6B6B' }]}>Call failed</Text>
+            )}
+          </View>
         )}
 
         {/* Avatars row */}
@@ -231,7 +241,15 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
     letterSpacing: 0.5,
-    marginBottom: 12,
+    marginBottom: 4,
+  },
+  callStatusText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginBottom: 10,
   },
   avatarsRow: {
     flexDirection: 'row',

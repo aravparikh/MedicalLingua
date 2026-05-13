@@ -284,7 +284,7 @@ export default function HomeScreen() {
         <View style={styles.ctaWrap}>
           <Animated.View style={{ transform: [{ scale: btnScale }] }}>
             <TouchableOpacity
-              onPress={() => router.push('/dial')}
+              onPress={() => router.push('/call')}
               onPressIn={pressIn}
               onPressOut={pressOut}
               activeOpacity={1}

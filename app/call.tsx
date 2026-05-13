@@ -21,6 +21,7 @@ import TranscriptMessage from '../components/TranscriptMessage';
 import { translateToEnglish, translateToSpanish } from '../services/claude';
 import { saveCall } from '../services/storage';
 import { transcribeAudio } from '../services/whisper';
+import { startCall, hangUp, setMuted } from '../services/twilio';
 import type { CallRecord, TranscriptEntry } from '../types';
 import { CHUNK_DURATION_MS, startRecording, stopRecording } from '../utils/audio';
 import { generateId } from '../utils/format';
@@ -39,6 +40,8 @@ export default function CallScreen() {
   const [isSpeaker, setIsSpeaker] = useState(false);
   const [callStartedAt] = useState(() => Date.now());
 
+  const [callStatus, setCallStatus] = useState<'idle' | 'connecting' | 'connected' | 'failed'>('idle');
+
   const recordingRef = useRef<Audio.Recording | null>(null);
   const chunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isListeningRef = useRef(false);
@@ -50,7 +53,7 @@ export default function CallScreen() {
   async function toggleMute() {
     const next = !isMuted;
     setIsMuted(next);
-    // When muted, stop any active listening chunk immediately
+    await setMuted(next);
     if (next && isListening) {
       await handleStopListening();
     }
@@ -67,6 +70,22 @@ export default function CallScreen() {
       playsInSilentModeIOS: true,
     });
   }
+
+  // Initiate outbound Twilio call when a phone number is provided
+  useEffect(() => {
+    if (!number) return;
+    setCallStatus('connecting');
+    startCall(number)
+      .then(call => {
+        setCallStatus('connected');
+        call.on('disconnected', () => setCallStatus('idle'));
+      })
+      .catch(err => {
+        setCallStatus('failed');
+        Alert.alert('Call failed', err.message || String(err));
+      });
+    return () => { hangUp(); };
+  }, []);
 
   useEffect(() => {
     Audio.requestPermissionsAsync();
@@ -183,6 +202,7 @@ export default function CallScreen() {
   async function handleEndCall() {
     if (isListening) await handleStopListening();
     if (isSpeaking) await finishPatientRecording();
+    await hangUp();
     if (transcript.length === 0) {
       Alert.alert('No transcript', 'End the call anyway?', [{ text: 'Cancel', style: 'cancel' }, { text: 'End', style: 'destructive', onPress: () => router.replace('/home') }]);
       return;
@@ -196,6 +216,21 @@ export default function CallScreen() {
 
   function handlePlayEnglish(englishText: string) {
     ExpoSpeech.speak(englishText, { language: 'en-US', rate: 0.9 });
+  }
+
+  async function handleEditEntry(id: string, newSpanish: string) {
+    try {
+      const newEnglish = await translateToEnglish(newSpanish);
+      setTranscript(prev =>
+        prev.map(e =>
+          e.id === id
+            ? { ...e, originalText: newSpanish, translatedText: newEnglish }
+            : e
+        )
+      );
+    } catch (err: any) {
+      Alert.alert('Re-translation failed', err.message || String(err));
+    }
   }
 
   return (
@@ -217,6 +252,7 @@ export default function CallScreen() {
           isSpeaking={isSpeaking}
           callStartedAt={callStartedAt}
           dialedNumber={number || ''}
+          callStatus={callStatus}
           isMuted={isMuted}
           isSpeaker={isSpeaker}
           onClearChat={() => setTranscript([])}
@@ -244,21 +280,11 @@ export default function CallScreen() {
           )}
 
           {transcript.map((entry) => (
-            <View key={entry.id}>
-              <TranscriptMessage entry={entry} />
-              {entry.role === 'patient' && (
-                <TouchableOpacity
-                  style={styles.playButton}
-                  onPress={() => handlePlayEnglish(entry.translatedText)}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.playIconBg}>
-                    <Text style={{fontSize: 10}}>🔊</Text>
-                  </View>
-                  <Text style={styles.playButtonText}>Play translation aloud</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+            <TranscriptMessage
+              key={entry.id}
+              entry={entry}
+              onEdit={entry.role === 'patient' ? handleEditEntry : undefined}
+            />
           ))}
         </ScrollView>
 
