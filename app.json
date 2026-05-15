@@ -11,20 +11,31 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F4F1EB"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.medlingua.app"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.medlingua.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "MedLingua uses your microphone to transcribe and translate medical conversations in real time.",
+        "NSSpeechRecognitionUsageDescription": "MedLingua uses speech recognition to convert spoken words into text for translation.",
+        "NSCameraUsageDescription": "MedLingua does not use the camera.",
+        "UIBackgroundModes": ["audio"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#F4F1EB"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.medlingua.app"
+      "package": "com.medlingua.app",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -32,13 +43,23 @@
     },
     "plugins": [
       "expo-router",
-      "expo-av",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "MedLingua uses your microphone to transcribe and translate medical conversations in real time."
+        }
+      ],
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "Allow Lingua to access the microphone for speech recognition."
+          "microphonePermission": "MedLingua uses your microphone to transcribe and translate medical conversations in real time."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
   }
 }
