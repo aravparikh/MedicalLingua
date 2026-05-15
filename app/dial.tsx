@@ -1,151 +1,139 @@
 import { useRouter } from 'expo-router';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import {
+  SafeAreaView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  SafeAreaView,
-  Animated,
-  StatusBar,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
+
+const C = {
+  bg: '#F4F1EB',
+  surface: '#FFFFFF',
+  line: '#E5DFD2',
+  lineSoft: '#EFEBE0',
+  ink: '#1A1B1F',
+  ink2: '#2E3138',
+  inkMute: '#8A8E96',
+  inkFaint: '#B5B3AB',
+  primary: '#0F5BA8',
+  primaryStrong: '#0A4682',
+  primaryTint: '#DCEAF6',
+  warm: '#B66A3E',
+  warmTint: '#F3E2D2',
+  listen: '#2F8F73',
+  listenTint: '#DCEAE2',
+};
+
+const ROWS = [
+  [{ d: '1', s: '' }, { d: '2', s: 'ABC' }, { d: '3', s: 'DEF' }],
+  [{ d: '4', s: 'GHI' }, { d: '5', s: 'JKL' }, { d: '6', s: 'MNO' }],
+  [{ d: '7', s: 'PQRS' }, { d: '8', s: 'TUV' }, { d: '9', s: 'WXYZ' }],
+  [{ d: '*', s: '' }, { d: '0', s: '+' }, { d: '#', s: '' }],
+];
+
+function fmt(n: string) {
+  const d = n.replace(/\D/g, '');
+  const m = d.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
+  if (!m) return n;
+  if (m[3]) return `(${m[1]}) ${m[2]}-${m[3]}`;
+  if (m[2]) return `(${m[1]}) ${m[2]}`;
+  if (m[1]) return `(${m[1]}`;
+  return '';
+}
 
 export default function DialScreen() {
   const router = useRouter();
   const [number, setNumber] = useState('');
 
-  // Background ambient animation
-  const bgAnim1 = useRef(new Animated.Value(0)).current;
-  const bgAnim2 = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(bgAnim1, { toValue: 1, duration: 15000, useNativeDriver: true }),
-        Animated.timing(bgAnim1, { toValue: 0, duration: 15000, useNativeDriver: true })
-      ])
-    ).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(bgAnim2, { toValue: 1, duration: 20000, useNativeDriver: true }),
-        Animated.timing(bgAnim2, { toValue: 0, duration: 20000, useNativeDriver: true })
-      ])
-    ).start();
-  }, []);
-
-  const handlePress = (digit: string) => {
-    if (number.length < 15) {
-      setNumber(prev => prev + digit);
-    }
-  };
-
-  const handleDelete = () => {
-    setNumber(prev => prev.slice(0, -1));
-  };
-
-  const handleCall = () => {
-    router.push({ pathname: '/call', params: { number: number || '' } });
-  };
-
-  // Format number for display
-  const formatDisplayNumber = (num: string) => {
-    if (!num) return 'Dial Number';
-    let cleaned = ('' + num).replace(/\D/g, '');
-    let match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
-    if (!match) return num;
-    
-    if (match[3]) return `(${match[1]}) ${match[2]}-${match[3]}`;
-    if (match[2]) return `(${match[1]}) ${match[2]}`;
-    if (match[1]) return `(${match[1]}`;
-    return num;
-  };
-
-  const rows = [
-    [{ num: '1', letters: '' }, { num: '2', letters: 'A B C' }, { num: '3', letters: 'D E F' }],
-    [{ num: '4', letters: 'G H I' }, { num: '5', letters: 'J K L' }, { num: '6', letters: 'M N O' }],
-    [{ num: '7', letters: 'P Q R S' }, { num: '8', letters: 'T U V' }, { num: '9', letters: 'W X Y Z' }],
-    [{ num: '*', letters: '' }, { num: '0', letters: '+' }, { num: '#', letters: '' }]
-  ];
-
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={s.screen}>
+      <StatusBar barStyle="dark-content" />
+      <SafeAreaView style={{ flex: 1 }}>
 
-      {/* Deep Space Glassmorphism Background */}
-      <Animated.View style={[styles.orb1, { transform: [{ translateX: bgAnim1.interpolate({ inputRange: [0, 1], outputRange: [0, 100] }) }, { translateY: bgAnim2.interpolate({ inputRange: [0, 1], outputRange: [0, 50] }) }] }]} />
-      <Animated.View style={[styles.orb2, { transform: [{ translateX: bgAnim2.interpolate({ inputRange: [0, 1], outputRange: [0, -100] }) }, { translateY: bgAnim1.interpolate({ inputRange: [0, 1], outputRange: [0, -50] }) }] }]} />
-      <BlurView intensity={100} tint="dark" style={StyleSheet.absoluteFillObject} />
-
-      <SafeAreaView style={styles.safeArea}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backText}>Cancel</Text>
+        <View style={s.header}>
+          <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backText}>← Back</Text>
           </TouchableOpacity>
+          <Text style={s.headerTitle}>New Consultation</Text>
+          <View style={{ width: 70 }} />
         </View>
 
-        {/* Number Display Area */}
-        <View style={styles.numberDisplayContainer}>
-          
-          {/* Sexy International Calling Pill */}
-          <TouchableOpacity style={styles.countryPicker} activeOpacity={0.7}>
-            <Text style={styles.flagEmoji}>🇺🇸</Text>
-            <Text style={styles.countryCode}>+1</Text>
-            <Text style={styles.dropdownIcon}>▾</Text>
-          </TouchableOpacity>
+        {/* Primary CTA — In-Person */}
+        <View style={s.body}>
+          <View style={s.primaryCard}>
+            <View style={s.primaryIconWrap}>
+              <Text style={{ fontSize: 36 }}>🩺</Text>
+            </View>
+            <Text style={s.primaryLabel}>In-Person Visit</Text>
+            <Text style={s.primarySub}>
+              Doctor and patient in the same room.{'\n'}
+              MedLingua translates the conversation live.
+            </Text>
+            <TouchableOpacity
+              style={s.primaryBtn}
+              onPress={() => router.push('/call')}
+              activeOpacity={0.85}
+            >
+              <Text style={s.primaryBtnText}>Start Session →</Text>
+            </TouchableOpacity>
+          </View>
 
-          {/* Number */}
-          <Text style={[styles.numberText, !number && styles.numberPlaceholder]}>
-            {formatDisplayNumber(number)}
+          {/* Divider */}
+          <View style={s.dividerRow}>
+            <View style={s.dividerLine} />
+            <Text style={s.dividerText}>or call a number</Text>
+            <View style={s.dividerLine} />
+          </View>
+
+          {/* Number display */}
+          <Text style={[s.numberText, !number && s.numberPlaceholder]}>
+            {number ? fmt(number) : '(___) ___-____'}
           </Text>
 
-          <TouchableOpacity style={styles.addContactBtn}>
-            <Text style={styles.addContactText}>
-              {number.length > 0 ? 'Add to patient records' : ' '}
-            </Text>
-          </TouchableOpacity>
-        </View>
+          {/* Dialpad */}
+          <View style={s.pad}>
+            {ROWS.map((row, i) => (
+              <View key={i} style={s.padRow}>
+                {row.map(btn => (
+                  <TouchableOpacity
+                    key={btn.d}
+                    style={s.padBtn}
+                    onPress={() => number.length < 14 && setNumber(p => p + btn.d)}
+                    activeOpacity={0.6}
+                  >
+                    <Text style={s.padNum}>{btn.d}</Text>
+                    {btn.s ? <Text style={s.padSub}>{btn.s}</Text> : null}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ))}
 
-        {/* Premium iOS-style Dialpad */}
-        <View style={styles.dialpadContainer}>
-          {rows.map((row, i) => (
-            <View key={i} style={styles.dialRow}>
-              {row.map((btn) => (
-                <TouchableOpacity
-                  key={btn.num}
-                  style={styles.dialButton}
-                  onPress={() => handlePress(btn.num)}
-                  activeOpacity={0.5}
-                >
-                  <View style={styles.dialButtonInner}>
-                    <Text style={styles.dialNum}>{btn.num}</Text>
-                    {btn.letters ? <Text style={styles.dialLetters}>{btn.letters}</Text> : null}
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          ))}
-
-          {/* Action Row */}
-          <View style={styles.actionRow}>
-            <View style={styles.actionPlaceholder} />
-            
-            <TouchableOpacity 
-              style={styles.callButton} 
-              onPress={handleCall}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.callIcon}>📞</Text>
-            </TouchableOpacity>
-            
-            <View style={styles.actionPlaceholder}>
-              {number.length > 0 && (
-                <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} onLongPress={() => setNumber('')}>
-                  <Text style={styles.deleteIcon}>⌫</Text>
-                </TouchableOpacity>
-              )}
+            {/* Action row */}
+            <View style={s.padRow}>
+              <View style={{ width: 72, height: 72 }} />
+              <TouchableOpacity
+                style={[s.callBtn, !number && s.callBtnDisabled]}
+                onPress={() => number && router.push({ pathname: '/call', params: { number } })}
+                disabled={!number}
+                activeOpacity={0.8}
+              >
+                <Text style={{ fontSize: 28 }}>📞</Text>
+              </TouchableOpacity>
+              <View style={{ width: 72, height: 72, alignItems: 'center', justifyContent: 'center' }}>
+                {number.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => setNumber(p => p.slice(0, -1))}
+                    onLongPress={() => setNumber('')}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  >
+                    <Text style={{ fontSize: 24, color: C.inkMute }}>⌫</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           </View>
         </View>
@@ -154,173 +142,84 @@ export default function DialScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#05050A',
-  },
-  safeArea: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  orb1: {
-    position: 'absolute',
-    top: '5%',
-    left: '-20%',
-    width: 450,
-    height: 450,
-    borderRadius: 225,
-    backgroundColor: 'rgba(10, 132, 255, 0.4)',
-    filter: 'blur(60px)',
-  },
-  orb2: {
-    position: 'absolute',
-    bottom: '15%',
-    right: '-20%',
-    width: 500,
-    height: 500,
-    borderRadius: 250,
-    backgroundColor: 'rgba(48, 209, 88, 0.3)',
-    filter: 'blur(70px)',
-  },
+const s = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: C.bg },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 16,
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    height: 52,
   },
-  backButton: {
+  backBtn: {
     paddingVertical: 8,
+    paddingRight: 12,
+    width: 70,
   },
-  backText: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  numberDisplayContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  countryPicker: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginBottom: 16,
+  backText: { fontSize: 15, color: C.primary, fontWeight: '600' },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: C.ink2 },
+
+  body: { flex: 1, paddingHorizontal: 20, paddingTop: 8 },
+
+  primaryCard: {
+    backgroundColor: C.surface,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: C.line,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#1E2850',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.07,
+    shadowRadius: 12,
+    elevation: 3,
   },
-  flagEmoji: {
-    fontSize: 18,
-    marginRight: 6,
-  },
-  countryCode: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginRight: 4,
-  },
-  dropdownIcon: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 14,
-    fontWeight: '800',
-    marginTop: 2,
-  },
-  numberText: {
-    fontSize: 44,
-    fontWeight: '300',
-    color: '#FFF',
-    letterSpacing: 1.5,
-    height: 60,
-  },
-  numberPlaceholder: {
-    color: 'rgba(255, 255, 255, 0.2)',
-  },
-  addContactBtn: {
-    marginTop: 12,
-    height: 24,
-  },
-  addContactText: {
-    color: '#0A84FF',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  dialpadContainer: {
-    paddingHorizontal: 40,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  dialRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  dialButton: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  primaryIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    backgroundColor: C.primaryTint,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 14,
   },
-  dialButtonInner: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  primaryLabel: { fontSize: 20, fontWeight: '700', color: C.ink, marginBottom: 6 },
+  primarySub: { fontSize: 14, color: C.inkMute, textAlign: 'center', lineHeight: 20, marginBottom: 20 },
+  primaryBtn: {
+    backgroundColor: C.primary,
+    borderRadius: 99,
+    paddingHorizontal: 28,
+    paddingVertical: 14,
   },
-  dialNum: {
-    fontSize: 36,
-    color: '#FFF',
-    fontWeight: '300',
-    lineHeight: 42,
+  primaryBtnText: { fontSize: 15, fontWeight: '800', color: '#fff' },
+
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 20, gap: 10 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: C.line },
+  dividerText: { fontSize: 12, fontWeight: '700', color: C.inkFaint, letterSpacing: 0.5 },
+
+  numberText: { fontSize: 32, fontWeight: '300', color: C.ink, textAlign: 'center', letterSpacing: 2, marginBottom: 16 },
+  numberPlaceholder: { color: C.inkFaint },
+
+  pad: { gap: 6 },
+  padRow: { flexDirection: 'row', justifyContent: 'center', gap: 16 },
+  padBtn: {
+    width: 72, height: 72, borderRadius: 36,
+    backgroundColor: C.surface,
+    borderWidth: 1, borderColor: C.line,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
   },
-  dialLetters: {
-    fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontWeight: '700',
-    letterSpacing: 2,
+  padNum: { fontSize: 28, color: C.ink, fontWeight: '300', lineHeight: 34 },
+  padSub: { fontSize: 9, color: C.inkMute, fontWeight: '700', letterSpacing: 1.5 },
+
+  callBtn: {
+    width: 72, height: 72, borderRadius: 36,
+    backgroundColor: C.listen,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: C.listen, shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35, shadowRadius: 14, elevation: 6,
   },
-  actionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  actionPlaceholder: {
-    width: 84,
-    height: 84,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  callButton: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: '#30D158',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#30D158',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-  },
-  callButtonDisabled: {
-    opacity: 0.5,
-    shadowOpacity: 0.2,
-  },
-  callIcon: {
-    fontSize: 38,
-  },
-  deleteButton: {
-    width: 60,
-    height: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  deleteIcon: {
-    fontSize: 28,
-    color: 'rgba(255, 255, 255, 0.5)',
-  },
+  callBtnDisabled: { backgroundColor: C.inkFaint, shadowOpacity: 0 },
 });

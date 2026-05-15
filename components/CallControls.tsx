@@ -9,7 +9,20 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
+
+const C = {
+  bg: '#F4F1EB',
+  surface: '#FFFFFF',
+  line: '#E5DFD2',
+  ink: '#1A1B1F',
+  inkMute: '#8A8E96',
+  primary: '#0F5BA8',
+  primaryStrong: '#0A4682',
+  primaryTint: '#DCEAF6',
+  warm: '#B66A3E',
+  warmStrong: '#8E5028',
+  warmTint: '#F3E2D2',
+};
 
 interface Props {
   isListening: boolean;
@@ -20,29 +33,18 @@ interface Props {
   onSpeakSpanish: () => void;
 }
 
-// Sonar ring that expands outward and fades — one ping
-function SonarPing({ color, active }: { color: string; active: boolean }) {
+function PulseRing({ color, active }: { color: string; active: boolean }) {
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (!active) {
-      opacity.setValue(0);
-      scale.setValue(1);
-      return;
-    }
-
+    if (!active) { opacity.setValue(0); scale.setValue(1); return; }
     const loop = Animated.loop(
       Animated.parallel([
-        Animated.timing(scale, {
-          toValue: 2.2,
-          duration: 1400,
-          easing: Easing.out(Easing.ease),
-          useNativeDriver: true,
-        }),
+        Animated.timing(scale, { toValue: 2.0, duration: 1200, easing: Easing.out(Easing.ease), useNativeDriver: true }),
         Animated.sequence([
-          Animated.timing(opacity, { toValue: 0.6, duration: 100, useNativeDriver: true }),
-          Animated.timing(opacity, { toValue: 0, duration: 1300, useNativeDriver: true }),
+          Animated.timing(opacity, { toValue: 0.5, duration: 80, useNativeDriver: true }),
+          Animated.timing(opacity, { toValue: 0, duration: 1120, useNativeDriver: true }),
         ]),
       ])
     );
@@ -53,25 +55,12 @@ function SonarPing({ color, active }: { color: string; active: boolean }) {
   return (
     <Animated.View
       pointerEvents="none"
-      style={[
-        styles.sonarPing,
-        { borderColor: color, transform: [{ scale }], opacity },
-      ]}
+      style={[s.pulse, { borderColor: color, transform: [{ scale }], opacity }]}
     />
   );
 }
 
-export default function CallControls({
-  isListening,
-  isSpeaking,
-  isProcessing,
-  onStartListening,
-  onStopListening,
-  onSpeakSpanish,
-}: Props) {
-  const busy = isProcessing;
-
-  // Mic button reacts to actual audio level
+export default function CallControls({ isListening, isSpeaking, isProcessing, onStartListening, onStopListening, onSpeakSpanish }: Props) {
   const micScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -80,159 +69,96 @@ export default function CallControls({
       return;
     }
     const sub = DeviceEventEmitter.addListener('audio_metering', (db: number) => {
-      const floor = -40;
-      const bounded = Math.max(floor, Math.min(0, db));
-      const ratio = 1 - bounded / floor;
-      Animated.timing(micScale, {
-        toValue: 1 + ratio * 0.08,
-        duration: 60,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }).start();
+      const ratio = 1 - Math.max(-40, Math.min(0, db)) / -40;
+      Animated.timing(micScale, { toValue: 1 + ratio * 0.07, duration: 60, easing: Easing.linear, useNativeDriver: true }).start();
     });
     return () => sub.remove();
   }, [isListening, isSpeaking]);
 
   return (
-    <View style={styles.container}>
-      {/* Processing indicator */}
+    <View style={s.wrap}>
       {isProcessing && (
-        <View style={styles.processingRow}>
-          <ActivityIndicator size="small" color="#00D4FF" />
-          <Text style={styles.processingText}>Transcribing & translating…</Text>
+        <View style={s.processingRow}>
+          <ActivityIndicator size="small" color={C.primary} />
+          <Text style={s.processingText}>Translating…</Text>
         </View>
       )}
 
-      <View style={styles.stack}>
-        {/* ── Doctor / Listen button ── */}
+      <View style={s.row}>
+        {/* Provider / Doctor */}
         <TouchableOpacity
-          style={[styles.btn, busy && styles.btnDisabled]}
+          style={[s.btn, s.btnDoctor, isListening && s.btnActive, (isProcessing || isSpeaking) && s.btnDim]}
           onPress={isListening ? onStopListening : onStartListening}
-          disabled={busy || isSpeaking}
-          activeOpacity={0.75}
+          disabled={isProcessing || isSpeaking}
+          activeOpacity={0.8}
         >
-          <BlurView intensity={45} tint="dark" style={[styles.btnGlass, styles.btnDoctor]}>
-            {/* Sonar ping layer */}
-            <SonarPing color="#00D4FF" active={isListening} />
-            <Animated.View style={{ transform: [{ scale: micScale }] }}>
-              <Text style={styles.btnIcon}>{isListening ? '⏹' : '🩺'}</Text>
-            </Animated.View>
-            <View style={styles.btnLabelWrap}>
-              <Text style={styles.btnTitle}>
-                {isListening ? 'STOP' : 'PROVIDER'}
-              </Text>
-              <Text style={styles.btnSub}>
-                {isListening ? 'Transmitting…' : 'Speak English'}
-              </Text>
-            </View>
-            {isListening && <View style={styles.activeBar} />}
-          </BlurView>
+          <PulseRing color={C.primary} active={isListening} />
+          <Animated.View style={{ transform: [{ scale: micScale }] }}>
+            <Text style={s.btnIcon}>{isListening ? '⏹' : '🩺'}</Text>
+          </Animated.View>
+          <Text style={[s.btnLabel, { color: C.primary }]}>
+            {isListening ? 'STOP' : 'PROVIDER'}
+          </Text>
+          <Text style={s.btnSub}>{isListening ? 'Listening…' : 'Speak English'}</Text>
         </TouchableOpacity>
 
-        {/* ── Patient / Speak Spanish button ── */}
+        {/* Patient */}
         <TouchableOpacity
-          style={[styles.btn, styles.btnLg, busy && styles.btnDisabled]}
+          style={[s.btn, s.btnPatient, isSpeaking && s.btnActiveWarm, (isProcessing || isListening) && s.btnDim]}
           onPress={onSpeakSpanish}
-          disabled={busy || isListening}
-          activeOpacity={0.75}
+          disabled={isProcessing || isListening}
+          activeOpacity={0.8}
         >
-          <BlurView intensity={45} tint="dark" style={[styles.btnGlass, styles.btnPatient]}>
-            <SonarPing color="#00FFA0" active={isSpeaking} />
-            <Animated.View style={{ transform: [{ scale: micScale }] }}>
-              <Text style={styles.btnIcon}>{isSpeaking ? '⏹' : '🗣️'}</Text>
-            </Animated.View>
-            <View style={styles.btnLabelWrap}>
-              <Text style={[styles.btnTitle, { color: isSpeaking ? '#00FFA0' : '#00FFA0' }]}>
-                {isSpeaking ? 'DONE' : 'PACIENTE'}
-              </Text>
-              <Text style={styles.btnSub}>
-                {isSpeaking ? 'Receiving…' : 'Hablar Español'}
-              </Text>
-            </View>
-            {isSpeaking && <View style={[styles.activeBar, { backgroundColor: '#00FFA0' }]} />}
-          </BlurView>
+          <PulseRing color={C.warm} active={isSpeaking} />
+          <Animated.View style={{ transform: [{ scale: micScale }] }}>
+            <Text style={s.btnIcon}>{isSpeaking ? '⏹' : '🗣️'}</Text>
+          </Animated.View>
+          <Text style={[s.btnLabel, { color: C.warm }]}>
+            {isSpeaking ? 'DONE' : 'PACIENTE'}
+          </Text>
+          <Text style={s.btnSub}>{isSpeaking ? 'Recording…' : 'Hablar Español'}</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingBottom: 48,
-    paddingTop: 14,
+const s = StyleSheet.create({
+  wrap: {
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(1, 10, 18, 0.95)',
+    paddingBottom: 36,
+    paddingTop: 12,
+    backgroundColor: C.bg,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 212, 255, 0.12)',
+    borderTopColor: '#E5DFD2',
   },
   processingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-    gap: 10,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 8, marginBottom: 12,
   },
-  processingText: {
-    fontSize: 13,
-    color: '#00D4FF',
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  stack: { gap: 12 },
+  processingText: { fontSize: 13, color: C.primary, fontWeight: '700' },
 
-  btn: { borderRadius: 22, overflow: 'visible' },
-  btnLg: {},
-  btnDisabled: { opacity: 0.3 },
+  row: { flexDirection: 'row', gap: 12 },
 
-  btnGlass: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 24,
-    borderRadius: 22,
-    overflow: 'hidden',
-    borderWidth: 1,
-    gap: 16,
-  },
-  btnDoctor: {
-    borderColor: 'rgba(0, 212, 255, 0.3)',
-    backgroundColor: 'rgba(0, 212, 255, 0.06)',
-  },
-  btnPatient: {
-    paddingVertical: 26,
-    borderColor: 'rgba(0, 255, 160, 0.3)',
-    backgroundColor: 'rgba(0, 255, 160, 0.06)',
-  },
-
-  // Sonar ping ring — sits behind button content
-  sonarPing: {
-    position: 'absolute',
-    width: 60, height: 60, borderRadius: 30,
+  btn: {
+    flex: 1, borderRadius: 20, padding: 18,
+    alignItems: 'center', gap: 4,
     borderWidth: 1.5,
-    alignSelf: 'center',
+    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08, shadowRadius: 8, elevation: 3,
+    overflow: 'visible',
+  },
+  btnDoctor: { backgroundColor: C.surface, borderColor: C.primaryTint },
+  btnPatient: { backgroundColor: C.surface, borderColor: C.warmTint },
+  btnActive: { backgroundColor: C.primaryTint, borderColor: C.primary },
+  btnActiveWarm: { backgroundColor: C.warmTint, borderColor: C.warm },
+  btnDim: { opacity: 0.4 },
+
+  pulse: {
+    position: 'absolute', width: 50, height: 50, borderRadius: 25, borderWidth: 1.5,
   },
 
-  btnIcon: { fontSize: 32 },
-  btnLabelWrap: { flex: 1 },
-  btnTitle: {
-    fontSize: 16, fontWeight: '900',
-    color: '#00D4FF', letterSpacing: 1.5,
-    marginBottom: 2,
-  },
-  btnSub: {
-    fontSize: 12, color: 'rgba(255,255,255,0.35)',
-    fontWeight: '500', letterSpacing: 0.3,
-  },
-
-  // Glowing active indicator bar at bottom of button
-  activeBar: {
-    position: 'absolute',
-    bottom: 0, left: 0, right: 0,
-    height: 2,
-    backgroundColor: '#00D4FF',
-    shadowColor: '#00D4FF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1, shadowRadius: 8,
-  },
+  btnIcon: { fontSize: 28 },
+  btnLabel: { fontSize: 13, fontWeight: '900', letterSpacing: 1.2, marginTop: 2 },
+  btnSub: { fontSize: 11, color: C.inkMute, fontWeight: '500' },
 });
