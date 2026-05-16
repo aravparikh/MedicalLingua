@@ -50,9 +50,9 @@ export default function HomeScreen() {
     }, [])
   );
 
-  function startVisit() {
+  function startVisit(mode: 'room' | 'phone') {
     hapticMedium();
-    router.push('/call');
+    router.push({ pathname: '/call', params: { mode } });
   }
 
   function playLastSummary() {
@@ -101,29 +101,36 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <View style={s.hero}>
-          <Text style={s.kicker}>Para su visita médica</Text>
-          <Text style={s.title}>Entienda a su doctor con calma.</Text>
+          <Text style={s.kicker}>Intérprete médico con IA</Text>
+          <Text style={s.title}>Entienda a su doctor. En vivo.</Text>
           <Text style={s.subtitle}>
-            Toque el botón grande y empiece. No tiene que escribir nada.
+            Para visitas en persona, por video o por teléfono. Usted habla español. Su doctor habla inglés.
           </Text>
         </View>
 
-        <TouchableOpacity style={s.giantButton} onPress={startVisit} activeOpacity={0.86}>
-          <Text style={s.giantIcon}>🎙</Text>
-          <Text style={s.giantText}>Iniciar visita médica</Text>
-          <Text style={s.giantSub}>Doctor en inglés · Paciente en español</Text>
-        </TouchableOpacity>
+        <View style={s.modeGrid}>
+          <TouchableOpacity style={[s.modeCard, s.modeCardPrimary]} onPress={() => startVisit('room')} activeOpacity={0.86}>
+            <View style={s.modeIconPrimary}>
+              <Text style={s.modeEmoji}>🏥</Text>
+            </View>
+            <Text style={s.modeTitlePrimary}>Visita en persona</Text>
+            <Text style={s.modeBodyPrimary}>Ponga el teléfono entre usted y el doctor.</Text>
+            <View style={s.modePillPrimary}>
+              <Text style={s.modePillPrimaryText}>Empezar ahora</Text>
+            </View>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={s.phoneModeLink}
-          onPress={() => {
-            hapticLight();
-            router.push('/dial');
-          }}
-          activeOpacity={0.85}
-        >
-          <Text style={s.phoneModeText}>🔊 Estoy en una llamada por teléfono</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={s.modeCard} onPress={() => startVisit('phone')} activeOpacity={0.86}>
+            <View style={s.modeIcon}>
+              <Text style={s.modeEmoji}>📱</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.modeTitle}>Visita virtual o llamada</Text>
+              <Text style={s.modeBody}>Use altavoz en Zoom, MyChart o teléfono.</Text>
+            </View>
+            <Text style={s.modeArrow}>›</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={s.lastCard}>
           <View style={s.lastHeader}>
@@ -186,34 +193,69 @@ const s = StyleSheet.create({
   kicker: { fontSize: 17, fontWeight: '900', color: C.warm, marginBottom: 8 },
   title: { fontSize: 39, lineHeight: 45, fontWeight: '900', color: C.ink, letterSpacing: -0.7 },
   subtitle: { fontSize: 20, lineHeight: 29, color: C.inkSoft, marginTop: 14, fontWeight: '600' },
-  giantButton: {
-    minHeight: 178,
-    borderRadius: 34,
-    backgroundColor: C.primary,
+  modeGrid: { gap: 14 },
+  modeCard: {
+    minHeight: 116,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 22,
-    shadowColor: C.primary,
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.28,
-    shadowRadius: 28,
-    elevation: 8,
-  },
-  giantIcon: { fontSize: 44, marginBottom: 8 },
-  giantText: { fontSize: 28, lineHeight: 33, fontWeight: '900', color: '#fff', textAlign: 'center' },
-  giantSub: { fontSize: 17, color: '#EAF4FF', fontWeight: '800', marginTop: 8, textAlign: 'center' },
-  phoneModeLink: {
-    minHeight: 60,
-    marginTop: 12,
-    borderRadius: 20,
+    gap: 14,
+    borderRadius: 28,
     backgroundColor: C.surface,
     borderWidth: 1,
     borderColor: C.line,
+    padding: 18,
+    shadowColor: '#1E2850',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    elevation: 3,
+  },
+  modeCardPrimary: {
+    minHeight: 188,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    backgroundColor: C.primary,
+    borderColor: C.primary,
+    shadowColor: C.primary,
+    shadowOpacity: 0.24,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  modeIconPrimary: {
+    width: 66,
+    height: 66,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.16)',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    marginBottom: 8,
   },
-  phoneModeText: { fontSize: 17, lineHeight: 23, color: C.primaryStrong, fontWeight: '900', textAlign: 'center' },
+  modeIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 22,
+    backgroundColor: C.warmTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  modeEmoji: { fontSize: 34 },
+  modeTitlePrimary: { fontSize: 29, lineHeight: 34, fontWeight: '900', color: '#fff', letterSpacing: -0.3 },
+  modeBodyPrimary: { fontSize: 18, lineHeight: 25, color: '#EAF4FF', fontWeight: '800', marginTop: 6, marginBottom: 16 },
+  modePillPrimary: {
+    minHeight: 52,
+    borderRadius: 999,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 22,
+  },
+  modePillPrimaryText: { fontSize: 18, color: C.primaryStrong, fontWeight: '900' },
+  modeTitle: { fontSize: 22, lineHeight: 27, fontWeight: '900', color: C.ink },
+  modeBody: { fontSize: 17, lineHeight: 23, color: C.inkSoft, fontWeight: '700', marginTop: 3 },
+  modeArrow: { fontSize: 34, color: C.warm, fontWeight: '800' },
   lastCard: {
     marginTop: 24,
     backgroundColor: C.surface,
