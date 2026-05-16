@@ -69,7 +69,7 @@ export default function SummaryScreen() {
       setCall(updated);
       await updateCall(updated);
     } catch {
-      setError('No pudimos crear el resumen. Revise internet o la llave de API.');
+      setError('No pudimos crear el resumen. Revise su internet y vuelva a intentar.');
     } finally {
       setIsSummarizing(false);
     }

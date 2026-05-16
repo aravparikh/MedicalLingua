@@ -27,7 +27,7 @@ export default function DisclaimerBanner() {
   return (
     <Animated.View style={[s.wrap, { opacity, transform: [{ translateY }] }]}>
       <View style={s.banner}>
-        <Text style={s.icon}>⚠️</Text>
+        <Text style={s.icon}>ℹ️</Text>
         <Text style={s.text}>
           <Text style={s.bold}>Ayuda de traducción.</Text>{'  '}Confirme medicinas, dosis y fechas con su doctor.
         </Text>
@@ -44,21 +44,21 @@ const s = StyleSheet.create({
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF3C7',
-    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#F59E0B33',
+    borderColor: '#E5DFD2',
     paddingHorizontal: 14,
     paddingVertical: 10,
     gap: 10,
   },
   icon: { fontSize: 16 },
-  text: { flex: 1, fontSize: 16, color: '#92400E', lineHeight: 22 },
+  text: { flex: 1, fontSize: 16, color: '#555960', lineHeight: 22, fontWeight: '700' },
   bold: { fontWeight: '800' },
   closeBtn: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: 'rgba(146,64,14,0.1)',
+    backgroundColor: '#F4F1EB',
     alignItems: 'center', justifyContent: 'center',
   },
-  closeText: { fontSize: 16, fontWeight: '800', color: '#92400E' },
+  closeText: { fontSize: 16, fontWeight: '800', color: '#555960' },
 });

@@ -52,7 +52,7 @@ export default function HomeScreen() {
 
   function startVisit() {
     hapticMedium();
-    router.push('/dial');
+    router.push('/call');
   }
 
   function playLastSummary() {
@@ -104,7 +104,7 @@ export default function HomeScreen() {
           <Text style={s.kicker}>Para su visita médica</Text>
           <Text style={s.title}>Entienda a su doctor con calma.</Text>
           <Text style={s.subtitle}>
-            Toque el botón grande cuando esté lista. MedLingua traduce lo que dice el doctor y lo que usted responde.
+            Toque el botón grande y empiece. No tiene que escribir nada.
           </Text>
         </View>
 
@@ -112,6 +112,17 @@ export default function HomeScreen() {
           <Text style={s.giantIcon}>🎙</Text>
           <Text style={s.giantText}>Iniciar visita médica</Text>
           <Text style={s.giantSub}>Doctor en inglés · Paciente en español</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={s.phoneModeLink}
+          onPress={() => {
+            hapticLight();
+            router.push('/dial');
+          }}
+          activeOpacity={0.85}
+        >
+          <Text style={s.phoneModeText}>🔊 Estoy en una llamada por teléfono</Text>
         </TouchableOpacity>
 
         <View style={s.lastCard}>
@@ -125,11 +136,11 @@ export default function HomeScreen() {
 
           <Text style={s.lastSummary}>{getLastSummary(lastCall)}</Text>
 
-          <View style={s.lastActions}>
-            <TouchableOpacity style={s.listenButton} onPress={playLastSummary} activeOpacity={0.85}>
-              <Text style={s.listenText}>🔊 Escuchar resumen</Text>
-            </TouchableOpacity>
-            {lastCall && (
+          {lastCall ? (
+            <View style={s.lastActions}>
+              <TouchableOpacity style={s.listenButton} onPress={playLastSummary} activeOpacity={0.85}>
+                <Text style={s.listenText}>🔊 Escuchar resumen</Text>
+              </TouchableOpacity>
               <TouchableOpacity
                 style={s.openButton}
                 onPress={() => {
@@ -140,8 +151,12 @@ export default function HomeScreen() {
               >
                 <Text style={s.openText}>Ver</Text>
               </TouchableOpacity>
-            )}
-          </View>
+            </View>
+          ) : (
+            <View style={s.noVisitHint}>
+              <Text style={s.noVisitHintText}>Su resumen aparecerá aquí al terminar una visita.</Text>
+            </View>
+          )}
         </View>
 
         <Text style={s.disclaimer}>
@@ -187,6 +202,18 @@ const s = StyleSheet.create({
   giantIcon: { fontSize: 44, marginBottom: 8 },
   giantText: { fontSize: 28, lineHeight: 33, fontWeight: '900', color: '#fff', textAlign: 'center' },
   giantSub: { fontSize: 17, color: '#EAF4FF', fontWeight: '800', marginTop: 8, textAlign: 'center' },
+  phoneModeLink: {
+    minHeight: 60,
+    marginTop: 12,
+    borderRadius: 20,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  phoneModeText: { fontSize: 17, lineHeight: 23, color: C.primaryStrong, fontWeight: '900', textAlign: 'center' },
   lastCard: {
     marginTop: 24,
     backgroundColor: C.surface,
@@ -206,6 +233,18 @@ const s = StyleSheet.create({
   lastIcon: { fontSize: 30 },
   lastSummary: { fontSize: 20, lineHeight: 30, color: C.ink, fontWeight: '600' },
   lastActions: { flexDirection: 'row', gap: 12, marginTop: 18 },
+  noVisitHint: {
+    marginTop: 16,
+    minHeight: 56,
+    borderRadius: 18,
+    backgroundColor: C.surfaceSunk,
+    borderWidth: 1,
+    borderColor: C.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+  },
+  noVisitHintText: { fontSize: 16, lineHeight: 22, color: C.inkSoft, textAlign: 'center', fontWeight: '800' },
   listenButton: {
     flex: 1,
     minHeight: 60,

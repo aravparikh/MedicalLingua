@@ -39,7 +39,8 @@ const C = {
 export default function CallScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
-  const { number } = useLocalSearchParams<{ number?: string }>();
+  const { number, mode } = useLocalSearchParams<{ number?: string; mode?: string }>();
+  const isPhoneMode = mode === 'phone';
 
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [isListening, setIsListening] = useState(false);
@@ -244,6 +245,15 @@ export default function CallScreen() {
     }
   }
 
+  function showCallHelp() {
+    Alert.alert(
+      'Cómo usar MedLingua',
+      isPhoneMode
+        ? '1. Ponga su llamada en altavoz.\n2. Toque "El doctor habla" cuando hable el doctor.\n3. Toque "Yo hablo" cuando usted responda.\n4. Toque "Terminar" para recibir su resumen.'
+        : '1. Ponga el teléfono cerca de usted.\n2. Toque "El doctor habla" cuando hable el doctor.\n3. Toque "Yo hablo" cuando usted responda.\n4. Toque "Terminar" para recibir su resumen.'
+    );
+  }
+
   return (
     <View style={s.screen}>
       <StatusBar barStyle="dark-content" />
@@ -255,6 +265,13 @@ export default function CallScreen() {
           <Text style={s.privacyText}>🔒 Conversación privada</Text>
         </View>
 
+        {isPhoneMode && (
+          <View style={s.phoneModeCard}>
+            <Text style={s.phoneModeTitle}>🔊 Use altavoz</Text>
+            <Text style={s.phoneModeText}>MedLingua escucha el sonido de la llamada y traduce en esta pantalla.</Text>
+          </View>
+        )}
+
         <CallPanel
           isListening={isListening}
           isSpeaking={isSpeaking}
@@ -262,7 +279,7 @@ export default function CallScreen() {
           dialedNumber={number || ''}
           isMuted={isMuted}
           isSpeaker={isSpeaker}
-          onClearChat={() => setTranscript([])}
+          onShowHelp={showCallHelp}
           onEndCall={handleEndCall}
           onToggleMute={toggleMute}
           onToggleSpeaker={toggleSpeaker}
@@ -281,8 +298,8 @@ export default function CallScreen() {
               </View>
               <Text style={s.emptyTitle}>Lista para traducir</Text>
               <Text style={s.emptySub}>
-                Toque <Text style={s.emptyBold}>El doctor habla</Text> cuando hable el doctor en inglés.{'\n'}
-                Toque <Text style={s.emptyBoldWarm}>Yo hablo</Text> cuando usted responda en español.
+                Toque <Text style={s.emptyBold}>El doctor habla</Text> cuando hable el doctor.{'\n'}
+                Toque <Text style={s.emptyBoldWarm}>Yo hablo</Text> cuando usted responda.
               </Text>
 
               <View style={s.statsRow}>
@@ -335,6 +352,18 @@ const s = StyleSheet.create({
     borderColor: '#2F8F7333',
   },
   privacyText: { fontSize: 16, color: '#2F8F73', fontWeight: '900' },
+  phoneModeCard: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: C.line,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  phoneModeTitle: { fontSize: 18, color: C.ink, fontWeight: '900', marginBottom: 2 },
+  phoneModeText: { fontSize: 16, lineHeight: 22, color: C.ink2, fontWeight: '700' },
   scroll: { flex: 1 },
   scrollContent: { paddingVertical: 16, paddingHorizontal: 12, paddingBottom: 24, flexGrow: 1 },
 

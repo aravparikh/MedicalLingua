@@ -81,7 +81,7 @@ export default function CallControls({ isListening, isSpeaking, isProcessing, on
       {isProcessing && (
         <View style={s.processingRow}>
           <ActivityIndicator size="small" color={C.primary} />
-          <Text style={s.processingText}>Translating…</Text>
+          <Text style={s.processingText}>Traduciendo...</Text>
         </View>
       )}
 

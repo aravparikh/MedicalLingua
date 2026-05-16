@@ -28,7 +28,7 @@ interface Props {
   callStartedAt: number;
   dialedNumber?: string;
   callStatus?: 'idle' | 'connecting' | 'connected' | 'failed';
-  onClearChat: () => void;
+  onShowHelp: () => void;
   onEndCall: () => void;
   onToggleMute: () => void;
   onToggleSpeaker: () => void;
@@ -37,7 +37,7 @@ interface Props {
 export default function CallPanel({
   isListening, isSpeaking, isMuted, isSpeaker,
   callStartedAt, dialedNumber, callStatus,
-  onClearChat, onEndCall, onToggleMute, onToggleSpeaker,
+  onShowHelp, onEndCall, onToggleMute, onToggleSpeaker,
 }: Props) {
   const [duration, setDuration] = useState('00:00');
 
@@ -66,12 +66,12 @@ export default function CallPanel({
       <View style={s.topRow}>
         <TouchableOpacity
           onPress={() => {
-            hapticWarning();
-            onClearChat();
+            hapticLight();
+            onShowHelp();
           }}
           style={s.ghostBtn}
         >
-          <Text style={s.ghostBtnText}>Borrar</Text>
+          <Text style={s.ghostBtnText}>Ayuda</Text>
         </TouchableOpacity>
 
         <View style={s.timerPill}>
