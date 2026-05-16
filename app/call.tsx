@@ -1,14 +1,14 @@
-import * as ExpoSpeech from 'expo-speech';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  AppState,
+  type AppStateStatus,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { Audio } from 'expo-av';
@@ -22,6 +22,7 @@ import { transcribeAudio } from '../services/whisper';
 import type { CallRecord, TranscriptEntry } from '../types';
 import { CHUNK_DURATION_MS, startRecording, stopRecording } from '../utils/audio';
 import { generateId } from '../utils/format';
+import { hapticWarning } from '../utils/haptics';
 
 const C = {
   bg: '#F4F1EB',
@@ -51,9 +52,49 @@ export default function CallScreen() {
   const recordingRef = useRef<Audio.Recording | null>(null);
   const chunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isListeningRef = useRef(false);
+  const isSpeakingRef = useRef(false);
+  const backgroundedAtRef = useRef<number | null>(null);
+  const transcriptRef = useRef<TranscriptEntry[]>([]);
 
   useEffect(() => {
     Audio.requestPermissionsAsync();
+  }, []);
+
+  useEffect(() => {
+    transcriptRef.current = transcript;
+  }, [transcript]);
+
+  useEffect(() => {
+    isSpeakingRef.current = isSpeaking;
+  }, [isSpeaking]);
+
+  useEffect(() => {
+    async function handleAppState(nextState: AppStateStatus) {
+      if (nextState === 'background' || nextState === 'inactive') {
+        backgroundedAtRef.current = Date.now();
+        if (isListeningRef.current) await handleStopListening();
+        if (isSpeakingRef.current) await finishPatientRecording();
+        return;
+      }
+
+      if (nextState === 'active' && backgroundedAtRef.current) {
+        const awayForMs = Date.now() - backgroundedAtRef.current;
+        backgroundedAtRef.current = null;
+        if (awayForMs >= 60_000 && transcriptRef.current.length > 0) {
+          hapticWarning();
+          setTranscript([]);
+          Alert.alert(
+            'Conversación borrada',
+            'Por seguridad, borramos la conversación abierta porque la app estuvo cerrada más de 1 minuto.'
+          );
+        }
+      }
+    }
+
+    const sub = AppState.addEventListener('change', state => {
+      handleAppState(state).catch(console.error);
+    });
+    return () => sub.remove();
   }, []);
 
   const appendEntry = useCallback((entry: TranscriptEntry) => {
@@ -87,7 +128,7 @@ export default function CallScreen() {
         timestamp: Date.now(),
       });
     } catch (err: any) {
-      Alert.alert('Transcription error', err.message || String(err));
+      Alert.alert('Error de traducción', err.message || String(err));
     }
   }
 
@@ -113,7 +154,7 @@ export default function CallScreen() {
       } catch (err: any) {
         setIsListening(false);
         isListeningRef.current = false;
-        Alert.alert('Recording error', err.message);
+        Alert.alert('Error del micrófono', err.message);
       }
     }
     recordChunk();
@@ -142,7 +183,7 @@ export default function CallScreen() {
       (rec as any)._doneTimer = setTimeout(() => finishPatientRecording(), 30000);
     } catch (err: any) {
       setIsSpeaking(false);
-      Alert.alert('Recording error', err.message);
+      Alert.alert('Error del micrófono', err.message);
     }
   }
 
@@ -164,7 +205,7 @@ export default function CallScreen() {
         timestamp: Date.now(),
       });
     } catch (err: any) {
-      Alert.alert('Transcription error', err.message);
+      Alert.alert('Error de traducción', err.message);
     } finally {
       setIsProcessing(false);
     }
@@ -175,9 +216,9 @@ export default function CallScreen() {
     if (isSpeaking) await finishPatientRecording();
 
     if (transcript.length === 0) {
-      Alert.alert('No transcript', 'End the session anyway?', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'End', style: 'destructive', onPress: () => router.replace('/home') },
+      Alert.alert('No hay conversación', '¿Terminar la visita de todos modos?', [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Terminar', style: 'destructive', onPress: () => router.replace('/home') },
       ]);
       return;
     }
@@ -199,7 +240,7 @@ export default function CallScreen() {
         e.id === id ? { ...e, originalText: newSpanish, translatedText: newEnglish } : e
       ));
     } catch (err: any) {
-      Alert.alert('Re-translation failed', err.message || String(err));
+      Alert.alert('No se pudo traducir de nuevo', err.message || String(err));
     }
   }
 
@@ -209,6 +250,10 @@ export default function CallScreen() {
       <SafeAreaView style={{ flex: 1 }}>
 
         <DisclaimerBanner />
+
+        <View style={s.privacyBadge}>
+          <Text style={s.privacyText}>🔒 Conversación privada</Text>
+        </View>
 
         <CallPanel
           isListening={isListening}
@@ -234,18 +279,17 @@ export default function CallScreen() {
               <View style={s.emptyIconWrap}>
                 <Text style={{ fontSize: 32 }}>🌐</Text>
               </View>
-              <Text style={s.emptyTitle}>Ready to translate</Text>
+              <Text style={s.emptyTitle}>Lista para traducir</Text>
               <Text style={s.emptySub}>
-                Tap <Text style={s.emptyBold}>Provider</Text> when the doctor speaks English.{'\n'}
-                Tap <Text style={s.emptyBoldWarm}>Patient</Text> when the patient speaks Spanish.
+                Toque <Text style={s.emptyBold}>El doctor habla</Text> cuando hable el doctor en inglés.{'\n'}
+                Toque <Text style={s.emptyBoldWarm}>Yo hablo</Text> cuando usted responda en español.
               </Text>
 
-              {/* Stats row for judges / demo */}
               <View style={s.statsRow}>
                 {[
-                  { n: '25M', label: 'Americans with LEP' },
-                  { n: '$150', label: 'per hour interpreter' },
-                  { n: '~2s', label: 'translation delay' },
+                  { n: '1', label: 'Doctor habla' },
+                  { n: '2', label: 'Usted habla' },
+                  { n: '3', label: 'Reciba resumen' },
                 ].map(({ n, label }) => (
                   <View key={label} style={s.statTile}>
                     <Text style={s.statNum}>{n}</Text>
@@ -280,6 +324,17 @@ export default function CallScreen() {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: C.bg },
+  privacyBadge: {
+    alignSelf: 'center',
+    backgroundColor: '#DCEAE2',
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#2F8F7333',
+  },
+  privacyText: { fontSize: 16, color: '#2F8F73', fontWeight: '900' },
   scroll: { flex: 1 },
   scrollContent: { paddingVertical: 16, paddingHorizontal: 12, paddingBottom: 24, flexGrow: 1 },
 
@@ -289,8 +344,8 @@ const s = StyleSheet.create({
     backgroundColor: C.primaryTint,
     alignItems: 'center', justifyContent: 'center', marginBottom: 16,
   },
-  emptyTitle: { fontSize: 20, fontWeight: '700', color: C.ink, marginBottom: 8 },
-  emptySub: { fontSize: 14, color: C.inkMute, textAlign: 'center', lineHeight: 22 },
+  emptyTitle: { fontSize: 25, fontWeight: '900', color: C.ink, marginBottom: 8 },
+  emptySub: { fontSize: 18, color: C.ink2, textAlign: 'center', lineHeight: 27, fontWeight: '600' },
   emptyBold: { fontWeight: '800', color: C.primary },
   emptyBoldWarm: { fontWeight: '800', color: '#B66A3E' },
 
@@ -301,5 +356,5 @@ const s = StyleSheet.create({
     padding: 12, alignItems: 'center', gap: 3,
   },
   statNum: { fontSize: 18, fontWeight: '800', color: C.primary },
-  statLabel: { fontSize: 10, fontWeight: '700', color: C.inkMute, textAlign: 'center', letterSpacing: 0.3 },
+  statLabel: { fontSize: 14, fontWeight: '800', color: C.ink2, textAlign: 'center', letterSpacing: 0.1 },
 });

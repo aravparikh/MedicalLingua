@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { hapticMedium } from '../utils/haptics';
 
 const C = {
   bg: '#F4F1EB',
@@ -88,7 +89,11 @@ export default function CallControls({ isListening, isSpeaking, isProcessing, on
         {/* Provider / Doctor */}
         <TouchableOpacity
           style={[s.btn, s.btnDoctor, isListening && s.btnActive, (isProcessing || isSpeaking) && s.btnDim]}
-          onPress={isListening ? onStopListening : onStartListening}
+          onPress={() => {
+            hapticMedium();
+            if (isListening) onStopListening();
+            else onStartListening();
+          }}
           disabled={isProcessing || isSpeaking}
           activeOpacity={0.8}
         >
@@ -97,15 +102,18 @@ export default function CallControls({ isListening, isSpeaking, isProcessing, on
             <Text style={s.btnIcon}>{isListening ? '⏹' : '🩺'}</Text>
           </Animated.View>
           <Text style={[s.btnLabel, { color: C.primary }]}>
-            {isListening ? 'STOP' : 'PROVIDER'}
+            {isListening ? 'Listo' : 'El doctor habla'}
           </Text>
-          <Text style={s.btnSub}>{isListening ? 'Listening…' : 'Speak English'}</Text>
+          <Text style={s.btnSub}>{isListening ? 'Escuchando...' : 'Inglés a español'}</Text>
         </TouchableOpacity>
 
         {/* Patient */}
         <TouchableOpacity
           style={[s.btn, s.btnPatient, isSpeaking && s.btnActiveWarm, (isProcessing || isListening) && s.btnDim]}
-          onPress={onSpeakSpanish}
+          onPress={() => {
+            hapticMedium();
+            onSpeakSpanish();
+          }}
           disabled={isProcessing || isListening}
           activeOpacity={0.8}
         >
@@ -114,9 +122,9 @@ export default function CallControls({ isListening, isSpeaking, isProcessing, on
             <Text style={s.btnIcon}>{isSpeaking ? '⏹' : '🗣️'}</Text>
           </Animated.View>
           <Text style={[s.btnLabel, { color: C.warm }]}>
-            {isSpeaking ? 'DONE' : 'PACIENTE'}
+            {isSpeaking ? 'Listo' : 'Yo hablo'}
           </Text>
-          <Text style={s.btnSub}>{isSpeaking ? 'Recording…' : 'Hablar Español'}</Text>
+          <Text style={s.btnSub}>{isSpeaking ? 'Grabando...' : 'Español a inglés'}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -136,12 +144,12 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, marginBottom: 12,
   },
-  processingText: { fontSize: 13, color: C.primary, fontWeight: '700' },
+  processingText: { fontSize: 16, color: C.primary, fontWeight: '800' },
 
   row: { flexDirection: 'row', gap: 12 },
 
   btn: {
-    flex: 1, borderRadius: 20, padding: 18,
+    flex: 1, borderRadius: 20, padding: 18, minHeight: 126,
     alignItems: 'center', gap: 4,
     borderWidth: 1.5,
     shadowColor: '#1E2850', shadowOffset: { width: 0, height: 3 },
@@ -159,6 +167,6 @@ const s = StyleSheet.create({
   },
 
   btnIcon: { fontSize: 28 },
-  btnLabel: { fontSize: 13, fontWeight: '900', letterSpacing: 1.2, marginTop: 2 },
-  btnSub: { fontSize: 11, color: C.inkMute, fontWeight: '500' },
+  btnLabel: { fontSize: 18, fontWeight: '900', textAlign: 'center', marginTop: 2 },
+  btnSub: { fontSize: 16, color: C.inkMute, fontWeight: '800', textAlign: 'center' },
 });

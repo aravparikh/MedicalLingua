@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { hapticLight } from '../utils/haptics';
 
 export default function DisclaimerBanner() {
   const [visible, setVisible] = useState(true);
@@ -14,6 +15,7 @@ export default function DisclaimerBanner() {
   }, []);
 
   const dismiss = () => {
+    hapticLight();
     Animated.parallel([
       Animated.timing(opacity, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(translateY, { toValue: -20, duration: 250, useNativeDriver: true }),
@@ -27,7 +29,7 @@ export default function DisclaimerBanner() {
       <View style={s.banner}>
         <Text style={s.icon}>⚠️</Text>
         <Text style={s.text}>
-          <Text style={s.bold}>Translation aid only.</Text>{'  '}Not a substitute for professional medical advice.
+          <Text style={s.bold}>Ayuda de traducción.</Text>{'  '}Confirme medicinas, dosis y fechas con su doctor.
         </Text>
         <TouchableOpacity onPress={dismiss} style={s.closeBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <Text style={s.closeText}>✕</Text>
@@ -51,12 +53,12 @@ const s = StyleSheet.create({
     gap: 10,
   },
   icon: { fontSize: 16 },
-  text: { flex: 1, fontSize: 12, color: '#92400E', lineHeight: 17 },
+  text: { flex: 1, fontSize: 16, color: '#92400E', lineHeight: 22 },
   bold: { fontWeight: '800' },
   closeBtn: {
-    width: 22, height: 22, borderRadius: 11,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: 'rgba(146,64,14,0.1)',
     alignItems: 'center', justifyContent: 'center',
   },
-  closeText: { fontSize: 10, fontWeight: '800', color: '#92400E' },
+  closeText: { fontSize: 16, fontWeight: '800', color: '#92400E' },
 });

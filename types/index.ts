@@ -1,9 +1,9 @@
 export interface TranscriptEntry {
   id: string;
   role: 'provider' | 'patient';
-  /** English text (provider original, or patient translation) */
+  /** Spoken source text: English for provider, Spanish for patient. */
   originalText: string;
-  /** Spanish text (provider translation, or patient original) */
+  /** Translated text: Spanish for provider, English for patient. */
   translatedText: string;
   timestamp: number;
 }
@@ -19,6 +19,10 @@ export interface CallSummary {
   followUpInstructions: string[];
   keyNumbers: string[];
   rawText: string;
+  nextVisit?: string;
+  homeInstructions: string[];
+  whenToCallDoctor: string[];
+  simpleExplanation?: string;
 }
 
 export interface CallRecord {

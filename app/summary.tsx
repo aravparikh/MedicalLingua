@@ -1,7 +1,9 @@
+import * as ExpoSpeech from 'expo-speech';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -12,9 +14,32 @@ import {
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import TranscriptMessage from '../components/TranscriptMessage';
 import { generateCallSummary } from '../services/claude';
+import { shareCallSummary } from '../services/share';
 import { loadCalls, updateCall } from '../services/storage';
 import type { CallRecord, CallSummary } from '../types';
 import { formatDuration, formatTimestamp } from '../utils/format';
+import { hapticLight, hapticMedium } from '../utils/haptics';
+
+const C = {
+  bg: '#F4F1EB',
+  surface: '#FFFFFF',
+  surfaceSunk: '#FAF7F1',
+  line: '#E5DFD2',
+  ink: '#1A1B1F',
+  inkSoft: '#555960',
+  primary: '#0F5BA8',
+  primaryTint: '#DCEAF6',
+  warm: '#B66A3E',
+  warmTint: '#F3E2D2',
+  listen: '#2F8F73',
+  listenTint: '#DCEAE2',
+  alert: '#B5443A',
+  alertTint: '#F4DDD8',
+};
+
+function safeList(items?: string[]) {
+  return items?.length ? items : ['No se mencionó.'];
+}
 
 export default function SummaryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -22,19 +47,18 @@ export default function SummaryScreen() {
 
   const [call, setCall] = useState<CallRecord | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
     loadCalls()
-      .then((calls) => {
-        const found = calls.find((c) => c.id === id) ?? null;
+      .then(calls => {
+        const found = calls.find(c => c.id === id) ?? null;
         setCall(found);
-        if (found && !found.summary) {
-          fetchSummary(found);
-        }
+        if (found && !found.summary) fetchSummary(found);
       })
-      .catch((e) => setError(String(e)));
+      .catch(e => setError(String(e)));
   }, [id]);
 
   async function fetchSummary(record: CallRecord) {
@@ -44,74 +68,104 @@ export default function SummaryScreen() {
       const updated = { ...record, summary };
       setCall(updated);
       await updateCall(updated);
-    } catch (e) {
-      setError('Could not generate summary. Check your API key and connection.');
+    } catch {
+      setError('No pudimos crear el resumen. Revise internet o la llave de API.');
     } finally {
       setIsSummarizing(false);
     }
   }
 
+  async function handleShare() {
+    if (!call?.summary) return;
+    hapticMedium();
+    setIsSharing(true);
+    try {
+      await shareCallSummary(call);
+    } catch (err: any) {
+      Alert.alert('No se pudo enviar', err.message || String(err));
+    } finally {
+      setIsSharing(false);
+    }
+  }
+
+  function speakSummary() {
+    if (!call?.summary) return;
+    hapticLight();
+    const s = call.summary;
+    const text = [
+      s.rawText,
+      s.simpleExplanation,
+      `Medicinas: ${s.medications.map(m => `${m.name}, ${m.dose}`).join('. ') || 'No se mencionaron.'}`,
+      `Qué hacer en casa: ${safeList(s.homeInstructions?.length ? s.homeInstructions : s.followUpInstructions).join('. ')}`,
+    ].filter(Boolean).join('. ');
+    ExpoSpeech.stop();
+    ExpoSpeech.speak(text, { language: 'es-MX', rate: 0.86 });
+  }
+
   if (!call) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator style={{ marginTop: 40 }} />
+      <SafeAreaView style={s.container}>
+        <ActivityIndicator style={{ marginTop: 40 }} color={C.primary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       <DisclaimerBanner />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.replace('/home')} style={styles.backBtn}>
-          <Text style={styles.backText}>← Home</Text>
+      <View style={s.header}>
+        <TouchableOpacity
+          onPress={() => {
+            hapticLight();
+            router.replace('/home');
+          }}
+          style={s.backBtn}
+        >
+          <Text style={s.backText}>Inicio</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Call Summary</Text>
-        <View style={{ width: 60 }} />
+        <Text style={s.headerTitle}>Resumen</Text>
+        <View style={{ width: 76 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Call meta */}
-        <View style={styles.metaCard}>
-          <Text style={styles.metaDate}>{formatTimestamp(call.startedAt)}</Text>
-          {call.endedAt && (
-            <Text style={styles.metaDuration}>
-              Duration: {formatDuration(call.startedAt, call.endedAt)}
-            </Text>
-          )}
-          <Text style={styles.metaEntries}>
-            {call.transcript.length} exchange{call.transcript.length !== 1 ? 's' : ''}
-          </Text>
-        </View>
-
-        {/* Summary card */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>📋 Extracted Information</Text>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <View style={s.metaCard}>
+          <Text style={s.metaTitle}>Su visita médica</Text>
+          <Text style={s.metaDate}>{formatTimestamp(call.startedAt)}</Text>
+          {call.endedAt && <Text style={s.metaLine}>Duración: {formatDuration(call.startedAt, call.endedAt)}</Text>}
+          <Text style={s.metaLine}>{call.transcript.length} partes traducidas</Text>
         </View>
 
         {isSummarizing && (
-          <View style={styles.summarizingRow}>
-            <ActivityIndicator size="small" color="#1A237E" />
-            <Text style={styles.summarizingText}>Generating summary with Claude…</Text>
+          <View style={s.loadingCard}>
+            <ActivityIndicator color={C.primary} />
+            <Text style={s.loadingText}>Creando resumen en palabras sencillas...</Text>
           </View>
         )}
 
         {error && (
-          <View style={styles.errorCard}>
-            <Text style={styles.errorText}>⚠️ {error}</Text>
+          <View style={s.errorCard}>
+            <Text style={s.errorText}>⚠️ {error}</Text>
           </View>
         )}
 
-        {call.summary && <SummaryCard summary={call.summary} />}
+        {call.summary && (
+          <>
+            <View style={s.actionsRow}>
+              <TouchableOpacity style={s.listenBtn} onPress={speakSummary} activeOpacity={0.85}>
+                <Text style={s.listenText}>🔊 Escuchar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={s.shareBtn} onPress={handleShare} activeOpacity={0.85} disabled={isSharing}>
+                <Text style={s.shareText}>{isSharing ? 'Preparando...' : 'Enviar a familia'}</Text>
+              </TouchableOpacity>
+            </View>
 
-        {/* Full transcript */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>💬 Full Transcript</Text>
-        </View>
+            <SummaryCards summary={call.summary} />
+          </>
+        )}
 
-        {call.transcript.map((entry) => (
+        <Text style={s.transcriptTitle}>Conversación completa</Text>
+        {call.transcript.map(entry => (
           <TranscriptMessage key={entry.id} entry={entry} />
         ))}
 
@@ -121,174 +175,92 @@ export default function SummaryScreen() {
   );
 }
 
-function SummaryCard({ summary }: { summary: CallSummary }) {
+function SummaryCards({ summary }: { summary: CallSummary }) {
+  const instructions = summary.homeInstructions?.length ? summary.homeInstructions : summary.followUpInstructions;
+
   return (
-    <View style={styles.summaryCard}>
-      {summary.rawText ? (
-        <View style={styles.summarySection}>
-          <Text style={styles.summaryLabel}>Overview</Text>
-          <Text style={styles.summaryValue}>{summary.rawText}</Text>
-        </View>
-      ) : null}
+    <View style={s.stack}>
+      <InfoCard emoji="🩺" title="En pocas palabras" tint={C.primaryTint}>
+        <Text style={s.bigText}>{summary.rawText || summary.simpleExplanation || 'No se mencionó.'}</Text>
+        {summary.simpleExplanation ? <Text style={s.explainText}>{summary.simpleExplanation}</Text> : null}
+      </InfoCard>
 
-      {summary.appointmentTime ? (
-        <View style={styles.summarySection}>
-          <Text style={styles.summaryLabel}>📅 Appointment</Text>
-          <Text style={styles.summaryValue}>{summary.appointmentTime}</Text>
-        </View>
-      ) : null}
+      <InfoCard emoji="💊" title="Medicinas" tint={C.warmTint}>
+        {summary.medications.length ? (
+          summary.medications.map((med, index) => (
+            <View key={`${med.name}-${index}`} style={s.medRow}>
+              <Text style={s.medName}>{med.name}</Text>
+              <Text style={s.medDose}>{med.dose}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={s.bigText}>No se mencionaron medicinas.</Text>
+        )}
+      </InfoCard>
 
-      {summary.medications.length > 0 && (
-        <View style={styles.summarySection}>
-          <Text style={styles.summaryLabel}>💊 Medications</Text>
-          {summary.medications.map((med, i) => (
-            <Text key={i} style={styles.summaryValue}>
-              • {med.name} — {med.dose}
-            </Text>
-          ))}
-        </View>
-      )}
+      <InfoCard emoji="📅" title="Próxima visita" tint={C.primaryTint}>
+        <Text style={s.bigText}>{summary.nextVisit || summary.appointmentTime || 'No se mencionó una próxima visita.'}</Text>
+      </InfoCard>
 
-      {summary.followUpInstructions.length > 0 && (
-        <View style={styles.summarySection}>
-          <Text style={styles.summaryLabel}>✅ Follow-Up Instructions</Text>
-          {summary.followUpInstructions.map((instr, i) => (
-            <Text key={i} style={styles.summaryValue}>
-              {i + 1}. {instr}
-            </Text>
-          ))}
-        </View>
-      )}
+      <InfoCard emoji="✅" title="Qué hacer en casa" tint={C.listenTint}>
+        {safeList(instructions).map((item, index) => (
+          <Text key={index} style={s.bullet}>• {item}</Text>
+        ))}
+      </InfoCard>
 
-      {summary.keyNumbers.length > 0 && (
-        <View style={styles.summarySection}>
-          <Text style={styles.summaryLabel}>📞 Key Numbers</Text>
-          {summary.keyNumbers.map((num, i) => (
-            <Text key={i} style={styles.summaryValue}>
-              • {num}
-            </Text>
-          ))}
-        </View>
-      )}
+      <InfoCard emoji="⚠️" title="Cuándo llamar al doctor" tint={C.alertTint}>
+        {safeList(summary.whenToCallDoctor).map((item, index) => (
+          <Text key={index} style={s.bullet}>• {item}</Text>
+        ))}
+      </InfoCard>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F9FA',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EBEBEB',
-  },
-  backBtn: {
-    width: 60,
-  },
-  backText: {
-    fontSize: 14,
-    color: '#1A237E',
-    fontWeight: '600',
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-  },
-  content: {
-    paddingBottom: 40,
-  },
-  metaCard: {
-    margin: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  metaDate: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#222',
-    marginBottom: 4,
-  },
-  metaDuration: {
-    fontSize: 13,
-    color: '#666',
-  },
-  metaEntries: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
-  },
-  sectionHeader: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 4,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1A237E',
-  },
-  summarizingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginHorizontal: 16,
-    marginVertical: 8,
-  },
-  summarizingText: {
-    fontSize: 13,
-    color: '#555',
-  },
-  errorCard: {
-    margin: 16,
-    backgroundColor: '#FDECEA',
-    borderRadius: 10,
-    padding: 12,
-  },
-  errorText: {
-    fontSize: 13,
-    color: '#B71C1C',
-    lineHeight: 18,
-  },
-  summaryCard: {
-    margin: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
-    gap: 14,
-  },
-  summarySection: {
-    gap: 4,
-  },
-  summaryLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#888',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  summaryValue: {
-    fontSize: 14,
-    color: '#222',
-    lineHeight: 20,
-  },
+function InfoCard({ emoji, title, tint, children }: { emoji: string; title: string; tint: string; children: React.ReactNode }) {
+  return (
+    <View style={s.infoCard}>
+      <View style={[s.infoIcon, { backgroundColor: tint }]}>
+        <Text style={s.infoEmoji}>{emoji}</Text>
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={s.infoTitle}>{title}</Text>
+        {children}
+      </View>
+    </View>
+  );
+}
+
+const s = StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.bg },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, minHeight: 62 },
+  backBtn: { minWidth: 76, minHeight: 60, justifyContent: 'center' },
+  backText: { fontSize: 18, color: C.primary, fontWeight: '900' },
+  headerTitle: { fontSize: 22, fontWeight: '900', color: C.ink },
+  content: { padding: 16, paddingBottom: 40 },
+  metaCard: { backgroundColor: C.surface, borderRadius: 24, borderWidth: 1, borderColor: C.line, padding: 18, marginBottom: 14 },
+  metaTitle: { fontSize: 24, fontWeight: '900', color: C.ink, marginBottom: 6 },
+  metaDate: { fontSize: 18, fontWeight: '800', color: C.inkSoft, marginBottom: 4 },
+  metaLine: { fontSize: 16, fontWeight: '700', color: C.inkSoft, marginTop: 2 },
+  loadingCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.surfaceSunk, borderRadius: 20, padding: 16, marginBottom: 14 },
+  loadingText: { flex: 1, fontSize: 17, lineHeight: 23, color: C.inkSoft, fontWeight: '800' },
+  errorCard: { backgroundColor: C.alertTint, borderRadius: 18, padding: 14, marginBottom: 14 },
+  errorText: { fontSize: 16, color: C.alert, lineHeight: 22, fontWeight: '800' },
+  actionsRow: { flexDirection: 'row', gap: 12, marginBottom: 14 },
+  listenBtn: { flex: 1, minHeight: 60, borderRadius: 18, backgroundColor: C.warmTint, alignItems: 'center', justifyContent: 'center' },
+  listenText: { fontSize: 18, fontWeight: '900', color: C.warm },
+  shareBtn: { flex: 1.2, minHeight: 60, borderRadius: 18, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 },
+  shareText: { fontSize: 17, fontWeight: '900', color: '#fff', textAlign: 'center' },
+  stack: { gap: 12 },
+  infoCard: { flexDirection: 'row', gap: 14, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 24, padding: 18 },
+  infoIcon: { width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  infoEmoji: { fontSize: 28 },
+  infoTitle: { fontSize: 21, fontWeight: '900', color: C.ink, marginBottom: 8 },
+  bigText: { fontSize: 19, lineHeight: 28, color: C.ink, fontWeight: '700' },
+  explainText: { fontSize: 17, lineHeight: 25, color: C.inkSoft, fontWeight: '700', marginTop: 10 },
+  medRow: { backgroundColor: C.surfaceSunk, borderRadius: 16, padding: 12, marginBottom: 8 },
+  medName: { fontSize: 20, fontWeight: '900', color: C.ink },
+  medDose: { fontSize: 18, lineHeight: 25, fontWeight: '800', color: C.warm, marginTop: 2 },
+  bullet: { fontSize: 18, lineHeight: 27, color: C.ink, fontWeight: '700', marginBottom: 6 },
+  transcriptTitle: { fontSize: 20, fontWeight: '900', color: C.ink, marginTop: 24, marginBottom: 8 },
 });

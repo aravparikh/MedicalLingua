@@ -57,11 +57,11 @@ export default function TranscriptMessage({ entry, onEdit }: Props) {
         {/* Original spoken text — editable for patient entries */}
         <View style={styles.originalContainer}>
           <View style={styles.originalLabelRow}>
-            <Text style={styles.originalLabel}>
-              {isProvider ? 'You said (EN)' : 'They said (ES)'}
+          <Text style={styles.originalLabel}>
+              {isProvider ? 'Original del doctor (EN)' : 'Lo que usted dijo (ES)'}
             </Text>
             {!isProvider && onEdit && !editing && (
-              <TouchableOpacity onPress={() => setEditing(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <TouchableOpacity style={styles.editButton} onPress={() => setEditing(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Text style={styles.editIcon}>✏️</Text>
               </TouchableOpacity>
             )}
@@ -78,7 +78,7 @@ export default function TranscriptMessage({ entry, onEdit }: Props) {
                 onSubmitEditing={commitEdit}
                 blurOnSubmit
                 onBlur={commitEdit}
-                placeholderTextColor="rgba(255,255,255,0.3)"
+                placeholderTextColor="#8A8E96"
               />
               <TouchableOpacity style={styles.doneBtn} onPress={commitEdit}>
                 <Text style={styles.doneBtnText}>Re-translate</Text>
@@ -102,33 +102,33 @@ const styles = StyleSheet.create({
   containerProvider: { justifyContent: 'flex-end' },
   containerPatient: { justifyContent: 'flex-start' },
   bubble: {
-    maxWidth: '85%',
+    maxWidth: '90%',
     borderRadius: 24,
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderWidth: 1,
   },
   bubbleProvider: {
-    backgroundColor: 'rgba(10, 132, 255, 0.15)',
-    borderColor: 'rgba(10, 132, 255, 0.3)',
+    backgroundColor: '#DCEAF6',
+    borderColor: '#0F5BA855',
     borderBottomRightRadius: 6,
   },
   bubblePatient: {
-    backgroundColor: 'rgba(48, 209, 88, 0.15)',
-    borderColor: 'rgba(48, 209, 88, 0.3)',
+    backgroundColor: '#DCEAE2',
+    borderColor: '#2F8F7355',
     borderBottomLeftRadius: 6,
   },
   translatedText: {
-    fontSize: 17,
-    color: '#FFFFFF',
-    fontWeight: '600',
-    lineHeight: 24,
+    fontSize: 22,
+    color: '#1A1B1F',
+    fontWeight: '800',
+    lineHeight: 30,
     letterSpacing: 0.3,
     marginBottom: 12,
   },
   originalContainer: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: 'rgba(26, 27, 31, 0.12)',
     paddingTop: 10,
   },
   originalLabelRow: {
@@ -138,23 +138,24 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   originalLabel: {
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: '800',
-    color: 'rgba(255, 255, 255, 0.4)',
+    color: '#555960',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  editIcon: { fontSize: 13 },
+  editButton: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  editIcon: { fontSize: 18 },
   originalText: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 16,
+    color: '#2E3138',
     fontStyle: 'italic',
-    lineHeight: 20,
+    lineHeight: 23,
   },
   editInputWrap: { gap: 8 },
   editInput: {
-    fontSize: 14,
-    color: '#fff',
+    fontSize: 16,
+    color: '#1A1B1F',
     fontStyle: 'italic',
     lineHeight: 20,
     borderWidth: 1,
@@ -162,21 +163,23 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: 'rgba(48, 209, 88, 0.08)',
-    minHeight: 40,
+    backgroundColor: '#FFFFFFAA',
+    minHeight: 60,
   },
   doneBtn: {
     alignSelf: 'flex-end',
     backgroundColor: 'rgba(48, 209, 88, 0.2)',
     borderRadius: 10,
     paddingHorizontal: 14,
+    minHeight: 44,
+    justifyContent: 'center',
     paddingVertical: 7,
     borderWidth: 1,
     borderColor: 'rgba(48, 209, 88, 0.4)',
   },
   doneBtnText: {
-    color: '#30D158',
-    fontSize: 12,
+    color: '#2F8F73',
+    fontSize: 16,
     fontWeight: '800',
     letterSpacing: 0.3,
   },

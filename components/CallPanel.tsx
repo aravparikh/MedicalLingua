@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { hapticLight, hapticWarning } from '../utils/haptics';
 
 const C = {
   bg: '#F4F1EB',
@@ -63,8 +64,14 @@ export default function CallPanel({
     <View style={s.wrap}>
       {/* Top bar */}
       <View style={s.topRow}>
-        <TouchableOpacity onPress={onClearChat} style={s.ghostBtn}>
-          <Text style={s.ghostBtnText}>Clear</Text>
+        <TouchableOpacity
+          onPress={() => {
+            hapticWarning();
+            onClearChat();
+          }}
+          style={s.ghostBtn}
+        >
+          <Text style={s.ghostBtnText}>Borrar</Text>
         </TouchableOpacity>
 
         <View style={s.timerPill}>
@@ -72,8 +79,14 @@ export default function CallPanel({
           <Text style={[s.timerText, isActive && s.timerTextActive]}>{duration}</Text>
         </View>
 
-        <TouchableOpacity onPress={onEndCall} style={s.endBtn}>
-          <Text style={s.endBtnText}>End</Text>
+        <TouchableOpacity
+          onPress={() => {
+            hapticWarning();
+            onEndCall();
+          }}
+          style={s.endBtn}
+        >
+          <Text style={s.endBtnText}>Terminar</Text>
         </TouchableOpacity>
       </View>
 
@@ -81,9 +94,9 @@ export default function CallPanel({
       {dialedNumber ? (
         <View style={s.numberRow}>
           <Text style={s.numberText}>{fmt(dialedNumber)}</Text>
-          {callStatus === 'connecting' && <Text style={s.statusChip}>Connecting…</Text>}
-          {callStatus === 'connected' && <Text style={[s.statusChip, s.statusConnected]}>● Connected</Text>}
-          {callStatus === 'failed' && <Text style={[s.statusChip, s.statusFailed]}>Call failed</Text>}
+          {callStatus === 'connecting' && <Text style={s.statusChip}>Conectando...</Text>}
+          {callStatus === 'connected' && <Text style={[s.statusChip, s.statusConnected]}>● Conectado</Text>}
+          {callStatus === 'failed' && <Text style={[s.statusChip, s.statusFailed]}>Falló</Text>}
         </View>
       ) : null}
 
@@ -93,9 +106,9 @@ export default function CallPanel({
           <View style={[s.avatarRing, isListening && !isMuted && s.ringBlue]}>
             <View style={s.avatar}><Text style={{ fontSize: 22 }}>👨‍⚕️</Text></View>
           </View>
-          <Text style={s.avatarName}>Provider</Text>
+          <Text style={s.avatarName}>Doctor</Text>
           <Text style={[s.avatarStatus, isListening && !isMuted && s.statusBlue, isMuted && s.statusMuted]}>
-            {isMuted ? 'Muted' : isListening ? 'Listening…' : 'Standby'}
+            {isMuted ? 'Silencio' : isListening ? 'Escuchando...' : 'Listo'}
           </Text>
         </View>
 
@@ -109,23 +122,37 @@ export default function CallPanel({
           <View style={[s.avatarRing, isSpeaking && s.ringWarm]}>
             <View style={s.avatar}><Text style={{ fontSize: 22 }}>🧑🏽</Text></View>
           </View>
-          <Text style={s.avatarName}>Patient</Text>
+          <Text style={s.avatarName}>Usted</Text>
           <Text style={[s.avatarStatus, isSpeaking && s.statusWarm]}>
-            {isSpeaking ? 'Speaking…' : 'Standby'}
+            {isSpeaking ? 'Hablando...' : 'Listo'}
           </Text>
         </View>
       </View>
 
       {/* Mute + Speaker */}
       <View style={s.controlsRow}>
-        <TouchableOpacity style={[s.ctrlBtn, isMuted && s.ctrlBtnAlert]} onPress={onToggleMute} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={[s.ctrlBtn, isMuted && s.ctrlBtnAlert]}
+          onPress={() => {
+            hapticLight();
+            onToggleMute();
+          }}
+          activeOpacity={0.7}
+        >
           <Text style={s.ctrlIcon}>{isMuted ? '🔇' : '🎙'}</Text>
-          <Text style={[s.ctrlLabel, isMuted && { color: C.alert }]}>{isMuted ? 'Unmute' : 'Mute'}</Text>
+          <Text style={[s.ctrlLabel, isMuted && { color: C.alert }]}>{isMuted ? 'Activar micrófono' : 'Silenciar'}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[s.ctrlBtn, isSpeaker && s.ctrlBtnBlue]} onPress={onToggleSpeaker} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={[s.ctrlBtn, isSpeaker && s.ctrlBtnBlue]}
+          onPress={() => {
+            hapticLight();
+            onToggleSpeaker();
+          }}
+          activeOpacity={0.7}
+        >
           <Text style={s.ctrlIcon}>{isSpeaker ? '🔊' : '🔈'}</Text>
-          <Text style={[s.ctrlLabel, isSpeaker && { color: C.primary }]}>{isSpeaker ? 'Speaker On' : 'Speaker'}</Text>
+          <Text style={[s.ctrlLabel, isSpeaker && { color: C.primary }]}>{isSpeaker ? 'Altavoz activo' : 'Altavoz'}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -148,15 +175,15 @@ const s = StyleSheet.create({
   },
 
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  ghostBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: C.line },
-  ghostBtnText: { fontSize: 13, color: C.inkMute, fontWeight: '600' },
+  ghostBtn: { minHeight: 44, minWidth: 66, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  ghostBtnText: { fontSize: 16, color: C.ink2, fontWeight: '800' },
   timerPill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: C.bg, borderRadius: 99, paddingHorizontal: 14, paddingVertical: 6 },
   liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: C.inkFaint },
   liveDotActive: { backgroundColor: '#22C55E' },
-  timerText: { fontSize: 15, fontWeight: '700', color: C.inkMute, fontVariant: ['tabular-nums'] },
+  timerText: { fontSize: 17, fontWeight: '800', color: C.inkMute, fontVariant: ['tabular-nums'] },
   timerTextActive: { color: C.ink },
-  endBtn: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 10, backgroundColor: C.alertTint, borderWidth: 1, borderColor: '#F0A9A3' },
-  endBtnText: { fontSize: 13, fontWeight: '800', color: C.alert },
+  endBtn: { minHeight: 44, minWidth: 84, borderRadius: 12, backgroundColor: C.alertTint, borderWidth: 1, borderColor: '#F0A9A3', alignItems: 'center', justifyContent: 'center' },
+  endBtnText: { fontSize: 16, fontWeight: '900', color: C.alert },
 
   numberRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 8 },
   numberText: { fontSize: 15, fontWeight: '600', color: C.ink2 },
@@ -170,8 +197,8 @@ const s = StyleSheet.create({
   ringBlue: { borderColor: C.primary, backgroundColor: C.primaryTint },
   ringWarm: { borderColor: C.warm, backgroundColor: C.warmTint },
   avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center' },
-  avatarName: { fontSize: 12, fontWeight: '700', color: C.ink2, marginBottom: 2 },
-  avatarStatus: { fontSize: 10, color: C.inkFaint, fontWeight: '600' },
+  avatarName: { fontSize: 16, fontWeight: '900', color: C.ink2, marginBottom: 2 },
+  avatarStatus: { fontSize: 14, color: C.inkFaint, fontWeight: '800' },
   statusBlue: { color: C.primary },
   statusWarm: { color: C.warm },
   statusMuted: { color: C.alert },
@@ -181,9 +208,9 @@ const s = StyleSheet.create({
   dotActive: { backgroundColor: C.primary },
 
   controlsRow: { flexDirection: 'row', gap: 10 },
-  ctrlBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: C.line, backgroundColor: C.bg },
+  ctrlBtn: { flex: 1, minHeight: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 8, borderRadius: 16, borderWidth: 1, borderColor: C.line, backgroundColor: C.bg },
   ctrlBtnAlert: { borderColor: '#F0A9A3', backgroundColor: C.alertTint },
   ctrlBtnBlue: { borderColor: C.primaryTint, backgroundColor: C.primaryTint },
   ctrlIcon: { fontSize: 16 },
-  ctrlLabel: { fontSize: 12, fontWeight: '700', color: C.inkMute },
+  ctrlLabel: { fontSize: 15, fontWeight: '900', color: C.ink2, textAlign: 'center' },
 });

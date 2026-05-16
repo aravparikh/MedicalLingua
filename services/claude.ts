@@ -60,21 +60,37 @@ export async function translateToEnglish(spanishText: string): Promise<string> {
   );
 }
 
-const SUMMARY_SYSTEM = `You are a medical scribe. Given a bilingual call transcript, extract structured information and return it as valid JSON with this exact shape:
+const SUMMARY_SYSTEM = `You are a bilingual medical scribe writing for a 67-year-old Spanish-speaking patient with limited English proficiency.
+
+Your job is to create a plain-language Spanish visit summary at about a 6th-grade reading level.
+Avoid medical jargon. If a medical word is needed, explain it in simple Spanish.
+Example: explain "hypertension" as "presión alta" and add one short explanation like "la sangre empuja con demasiada fuerza".
+
+Return valid JSON with this exact shape:
 {
   "appointmentTime": "string or null",
   "medications": [{ "name": "string", "dose": "string" }],
   "followUpInstructions": ["string"],
   "keyNumbers": ["string"],
-  "rawText": "string"
+  "rawText": "string",
+  "nextVisit": "string or null",
+  "homeInstructions": ["string"],
+  "whenToCallDoctor": ["string"],
+  "simpleExplanation": "string"
 }
 
 Rules:
 - appointmentTime: any scheduled date/time mentioned, or null
-- medications: every drug name and dosage mentioned
-- followUpInstructions: any action items for the patient
+- medications: every drug name and dosage mentioned. Preserve medication names exactly.
+- followUpInstructions: action items for the patient, written in simple Spanish
 - keyNumbers: phone numbers, fax numbers, reference numbers
-- rawText: a 2-3 sentence plain-English plain summary of the call
+- rawText: a 2-3 sentence Spanish summary in simple words
+- nextVisit: the next appointment or follow-up plan in Spanish, or null
+- homeInstructions: concrete things the patient should do at home, in Spanish
+- whenToCallDoctor: warning signs or reasons to call the doctor, in Spanish
+- simpleExplanation: a one-sentence Spanish explanation of the main diagnosis/problem
+- Preserve all numbers, doses, dates, and time references exactly.
+- For "once daily", write "una vez al día", never "once al día".
 - Return ONLY the JSON object, no markdown, no preamble.`;
 
 export async function generateCallSummary(
@@ -101,6 +117,10 @@ export async function generateCallSummary(
       followUpInstructions: parsed.followUpInstructions ?? [],
       keyNumbers: parsed.keyNumbers ?? [],
       rawText: parsed.rawText ?? '',
+      nextVisit: parsed.nextVisit ?? parsed.appointmentTime ?? undefined,
+      homeInstructions: parsed.homeInstructions ?? parsed.followUpInstructions ?? [],
+      whenToCallDoctor: parsed.whenToCallDoctor ?? [],
+      simpleExplanation: parsed.simpleExplanation ?? undefined,
     };
   } catch {
     return {
@@ -108,6 +128,8 @@ export async function generateCallSummary(
       followUpInstructions: [],
       keyNumbers: [],
       rawText: raw,
+      homeInstructions: [],
+      whenToCallDoctor: [],
     };
   }
 }
