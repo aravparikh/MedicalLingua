@@ -2,13 +2,40 @@ import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import type { TranscriptEntry } from '../types';
 
+type Lang = 'es' | 'en';
+
+const L = {
+  es: {
+    doctorOriginalEn: 'Original del doctor (EN)',
+    doctorTranslatedEs: 'Traducción al español',
+    youSaidEs: 'Lo que usted dijo (ES)',
+    youSaidTranslatedEn: 'Traducción al inglés',
+    retranslate: 'Re-traducir',
+    safetyVerified: '🛡️ Seguridad verificada',
+    caughtError: 'Detectamos un error peligroso',
+    warningLabel: 'Atención',
+  },
+  en: {
+    doctorOriginalEn: 'Doctor original (EN)',
+    doctorTranslatedEs: 'Spanish translation',
+    youSaidEs: 'Patient original (ES)',
+    youSaidTranslatedEn: 'English translation',
+    retranslate: 'Re-translate',
+    safetyVerified: '🛡️ Safety verified',
+    caughtError: 'We caught a dangerous error',
+    warningLabel: 'Heads up',
+  },
+};
+
 interface Props {
   entry: TranscriptEntry;
+  lang?: Lang;
   onEdit?: (id: string, newSpanish: string) => void;
 }
 
-export default function TranscriptMessage({ entry, onEdit }: Props) {
+export default function TranscriptMessage({ entry, lang = 'es', onEdit }: Props) {
   const isProvider = entry.role === 'provider';
+  const t = L[lang];
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
@@ -42,6 +69,22 @@ export default function TranscriptMessage({ entry, onEdit }: Props) {
   //   originalText = what they said in English
   //   translatedText = Spanish translation played to patient
 
+  // Figure out which text is in Spanish vs English
+  const spanishText = isProvider ? entry.translatedText : entry.originalText;
+  const englishText = isProvider ? entry.originalText : entry.translatedText;
+
+  // The user's preferred language is the BIG (prominent) text
+  const bigText = lang === 'es' ? spanishText : englishText;
+  const smallText = lang === 'es' ? englishText : spanishText;
+  const smallLabel = isProvider
+    ? (lang === 'es' ? t.doctorOriginalEn : t.doctorTranslatedEs)
+    : (lang === 'es' ? t.youSaidTranslatedEn : t.youSaidEs);
+
+  // Edit is only allowed on patient entries, and only edits the Spanish original
+  const canEdit = !isProvider && !!onEdit;
+  // Whether the small text is currently showing the Spanish original (editable)
+  const smallIsEditable = canEdit && smallText === entry.originalText;
+
   return (
     <Animated.View
       style={[
@@ -51,23 +94,47 @@ export default function TranscriptMessage({ entry, onEdit }: Props) {
       ]}
     >
       <View style={[styles.bubble, isProvider ? styles.bubbleProvider : styles.bubblePatient]}>
-        {/* Main translated text */}
-        <Text style={styles.translatedText}>{entry.translatedText}</Text>
+        {/* Safety guardrail chip — only shows if AI caught/flagged something */}
+        {entry.safetyFlags && entry.safetyFlags.length > 0 ? (
+          <View style={styles.safetyStack}>
+            {entry.safetyFlags.map((flag, i) => {
+              const isCaught = flag.level === 'caught';
+              return (
+                <View
+                  key={i}
+                  style={[styles.safetyChip, isCaught ? styles.safetyCaught : styles.safetyWarning]}
+                >
+                  <Text style={[styles.safetyTitle, isCaught ? styles.safetyTitleCaught : styles.safetyTitleWarning]}>
+                    {isCaught ? `🛡️  ${flag.title}` : `⚠️  ${flag.title}`}
+                  </Text>
+                  <Text style={[styles.safetyDetail, isCaught ? styles.safetyDetailCaught : styles.safetyDetailWarning]}>
+                    {flag.detail}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.safetyVerifiedRow}>
+            <Text style={styles.safetyVerifiedText}>{t.safetyVerified}</Text>
+          </View>
+        )}
 
-        {/* Original spoken text — editable for patient entries */}
+        {/* Main text in user's preferred language */}
+        <Text style={styles.translatedText}>{bigText}</Text>
+
+        {/* Counterpart text — editable for patient Spanish originals */}
         <View style={styles.originalContainer}>
           <View style={styles.originalLabelRow}>
-          <Text style={styles.originalLabel}>
-              {isProvider ? 'Original del doctor (EN)' : 'Lo que usted dijo (ES)'}
-            </Text>
-            {!isProvider && onEdit && !editing && (
+            <Text style={styles.originalLabel}>{smallLabel}</Text>
+            {smallIsEditable && !editing && (
               <TouchableOpacity style={styles.editButton} onPress={() => setEditing(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Text style={styles.editIcon}>✏️</Text>
               </TouchableOpacity>
             )}
           </View>
 
-          {editing ? (
+          {editing && smallIsEditable ? (
             <View style={styles.editInputWrap}>
               <TextInput
                 style={styles.editInput}
@@ -81,11 +148,11 @@ export default function TranscriptMessage({ entry, onEdit }: Props) {
                 placeholderTextColor="#8A8E96"
               />
               <TouchableOpacity style={styles.doneBtn} onPress={commitEdit}>
-                <Text style={styles.doneBtnText}>Re-translate</Text>
+                <Text style={styles.doneBtnText}>{t.retranslate}</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <Text style={styles.originalText}>{entry.originalText}</Text>
+            <Text style={styles.originalText}>{smallText}</Text>
           )}
         </View>
       </View>
@@ -118,6 +185,34 @@ const styles = StyleSheet.create({
     borderColor: '#2F8F7355',
     borderBottomLeftRadius: 6,
   },
+  safetyVerifiedRow: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(47, 143, 115, 0.12)',
+    borderWidth: 1, borderColor: 'rgba(47, 143, 115, 0.35)',
+    paddingHorizontal: 9, paddingVertical: 4,
+    borderRadius: 999,
+    marginBottom: 10,
+  },
+  safetyVerifiedText: {
+    fontSize: 11, fontWeight: '900', color: '#256E58', letterSpacing: 0.3,
+  },
+  safetyStack: { gap: 8, marginBottom: 12 },
+  safetyChip: {
+    borderRadius: 12, borderWidth: 1.5,
+    paddingHorizontal: 12, paddingVertical: 10,
+  },
+  safetyCaught: {
+    backgroundColor: '#FFF7DC', borderColor: '#E5CD7A',
+  },
+  safetyWarning: {
+    backgroundColor: '#FCEBE7', borderColor: '#E2887C',
+  },
+  safetyTitle: { fontSize: 13, fontWeight: '900', letterSpacing: 0.2, marginBottom: 4 },
+  safetyTitleCaught: { color: '#7A5E15' },
+  safetyTitleWarning: { color: '#B5443A' },
+  safetyDetail: { fontSize: 12, lineHeight: 17, fontWeight: '600' },
+  safetyDetailCaught: { color: '#7A5E15' },
+  safetyDetailWarning: { color: '#B5443A' },
   translatedText: {
     fontSize: 22,
     color: '#1A1B1F',

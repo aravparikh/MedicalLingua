@@ -2,12 +2,15 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import {
   SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import LanguagePill from '../components/LanguagePill';
+import { useLanguage } from '../hooks/useLanguage';
 import { hapticLight, hapticMedium } from '../utils/haptics';
 
 const C = {
@@ -24,8 +27,39 @@ const C = {
   listenTint: '#DCEAE2',
 };
 
+const L = {
+  es: {
+    back: 'Inicio',
+    headerTitle: 'Antes de empezar',
+    title: '¿Dónde está su doctor?',
+    subtitle: 'Elija una opción. MedLingua no hace la llamada; traduce lo que escucha.',
+    inPersonTitle: 'Está conmigo',
+    inPersonBody: 'Use esto en la sala médica. Ponga el teléfono cerca de usted.',
+    inPersonCta: 'Empezar traducción',
+    phoneTitle: 'Estoy en una llamada',
+    phoneBody: 'Ponga la llamada en altavoz, luego regrese aquí.',
+    important: 'Importante',
+    importantText: 'En Expo Go, MedLingua no puede conectarse directamente a la llamada del iPhone. Funciona escuchando el altavoz.',
+  },
+  en: {
+    back: 'Home',
+    headerTitle: 'Before we start',
+    title: 'Where is your doctor?',
+    subtitle: 'Pick an option. MedLingua does not place the call; it translates what it hears.',
+    inPersonTitle: 'With me in the room',
+    inPersonBody: 'Use this at the clinic. Place the phone near you.',
+    inPersonCta: 'Start translation',
+    phoneTitle: 'I am on a call',
+    phoneBody: 'Put the call on speaker, then come back here.',
+    important: 'Important',
+    importantText: 'In Expo Go, MedLingua cannot connect directly to your iPhone call. It works by listening to the speaker.',
+  },
+};
+
 export default function DialScreen() {
   const router = useRouter();
+  const { lang, toggle } = useLanguage();
+  const t = L[lang];
 
   function startTranslator(mode: 'room' | 'phone') {
     hapticMedium();
@@ -36,55 +70,52 @@ export default function DialScreen() {
     <View style={s.screen}>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={s.safe}>
-        <View style={s.header}>
-          <TouchableOpacity
-            onPress={() => {
-              hapticLight();
-              router.back();
-            }}
-            style={s.backBtn}
-          >
-            <Text style={s.backText}>Atrás</Text>
-          </TouchableOpacity>
-          <Text style={s.headerTitle}>Antes de empezar</Text>
-          <View style={{ width: 76 }} />
-        </View>
+        <ScrollView contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
+          <View style={s.header}>
+            <TouchableOpacity
+              onPress={() => { hapticLight(); router.replace('/home'); }}
+              style={s.backBtn}
+            >
+              <Text style={s.backText}>← {t.back}</Text>
+            </TouchableOpacity>
+            <Text style={s.headerTitle}>{t.headerTitle}</Text>
+            <LanguagePill lang={lang} onToggle={toggle} />
+          </View>
 
-        <View style={s.hero}>
-          <Text style={s.title}>¿Dónde está su doctor?</Text>
-          <Text style={s.subtitle}>Elija una opción. MedLingua no hace la llamada; traduce lo que escucha.</Text>
-        </View>
+          <View style={s.hero}>
+            <Text style={s.title}>{t.title}</Text>
+            <Text style={s.subtitle}>{t.subtitle}</Text>
+          </View>
 
-        <View style={s.cards}>
-          <TouchableOpacity style={s.primaryCard} onPress={() => startTranslator('room')} activeOpacity={0.86}>
-            <View style={s.iconBlue}>
-              <Text style={s.emoji}>🩺</Text>
-            </View>
-            <Text style={s.cardTitle}>Está conmigo</Text>
-            <Text style={s.cardText}>Use esto en la sala médica. Ponga el teléfono cerca de usted.</Text>
-            <View style={s.cardButton}>
-              <Text style={s.cardButtonText}>Empezar traducción</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={s.cards}>
+            <TouchableOpacity style={s.primaryCard} onPress={() => startTranslator('room')} activeOpacity={0.86}>
+              <View style={s.iconBlue}>
+                <Text style={s.emoji}>🩺</Text>
+              </View>
+              <Text style={s.cardTitle}>{t.inPersonTitle}</Text>
+              <Text style={s.cardText}>{t.inPersonBody}</Text>
+              <View style={s.cardButton}>
+                <Text style={s.cardButtonText}>{t.inPersonCta}</Text>
+              </View>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={s.phoneCard} onPress={() => startTranslator('phone')} activeOpacity={0.86}>
-            <View style={s.iconWarm}>
-              <Text style={s.emoji}>🔊</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={s.phoneTitle}>Estoy en una llamada</Text>
-              <Text style={s.phoneText}>Ponga la llamada en altavoz, luego regrese aquí.</Text>
-            </View>
-            <Text style={s.chev}>›</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity style={s.phoneCard} onPress={() => startTranslator('phone')} activeOpacity={0.86}>
+              <View style={s.iconWarm}>
+                <Text style={s.emoji}>🔊</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={s.phoneTitle}>{t.phoneTitle}</Text>
+                <Text style={s.phoneText}>{t.phoneBody}</Text>
+              </View>
+              <Text style={s.chev}>›</Text>
+            </TouchableOpacity>
+          </View>
 
-        <View style={s.truthCard}>
-          <Text style={s.truthTitle}>Importante</Text>
-          <Text style={s.truthText}>
-            En Expo Go, MedLingua no puede conectarse directamente a la llamada del iPhone. Funciona escuchando el altavoz.
-          </Text>
-        </View>
+          <View style={s.truthCard}>
+            <Text style={s.truthTitle}>{t.important}</Text>
+            <Text style={s.truthText}>{t.importantText}</Text>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -92,49 +123,40 @@ export default function DialScreen() {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: C.bg },
-  safe: { flex: 1, paddingHorizontal: 20 },
-  header: { minHeight: 64, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  backBtn: { minWidth: 76, minHeight: 60, justifyContent: 'center' },
-  backText: { fontSize: 18, color: C.primary, fontWeight: '900' },
-  headerTitle: { fontSize: 20, fontWeight: '900', color: C.ink },
-  hero: { paddingTop: 28, paddingBottom: 20 },
-  title: { fontSize: 36, lineHeight: 42, fontWeight: '900', color: C.ink, letterSpacing: -0.5 },
-  subtitle: { fontSize: 20, lineHeight: 29, color: C.inkSoft, fontWeight: '700', marginTop: 10 },
-  cards: { gap: 14 },
+  safe: { flex: 1 },
+  scrollContent: { paddingHorizontal: 18, paddingBottom: 24, flexGrow: 1 },
+
+  header: { minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  backBtn: { paddingVertical: 8, paddingRight: 8 },
+  backText: { fontSize: 15, color: C.primary, fontWeight: '700' },
+  headerTitle: { flex: 1, fontSize: 16, fontWeight: '800', color: C.ink, textAlign: 'center' },
+
+  hero: { paddingTop: 18, paddingBottom: 16 },
+  title: { fontSize: 26, lineHeight: 32, fontWeight: '900', color: C.ink, letterSpacing: -0.4 },
+  subtitle: { fontSize: 15, lineHeight: 21, color: C.inkSoft, fontWeight: '500', marginTop: 8 },
+
+  cards: { gap: 12 },
   primaryCard: {
-    backgroundColor: C.surface,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: C.line,
-    padding: 22,
-    shadowColor: '#1E2850',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
+    backgroundColor: C.surface, borderRadius: 22, borderWidth: 1, borderColor: C.line, padding: 18,
+    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.07, shadowRadius: 12, elevation: 3,
   },
-  iconBlue: { width: 74, height: 74, borderRadius: 24, backgroundColor: C.primaryTint, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
-  iconWarm: { width: 62, height: 62, borderRadius: 21, backgroundColor: C.warmTint, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  emoji: { fontSize: 34 },
-  cardTitle: { fontSize: 28, fontWeight: '900', color: C.ink, marginBottom: 8 },
-  cardText: { fontSize: 19, lineHeight: 28, color: C.inkSoft, fontWeight: '700', marginBottom: 18 },
-  cardButton: { minHeight: 64, borderRadius: 20, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
-  cardButtonText: { fontSize: 21, fontWeight: '900', color: '#fff' },
+  iconBlue: { width: 56, height: 56, borderRadius: 18, backgroundColor: C.primaryTint, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  iconWarm: { width: 52, height: 52, borderRadius: 16, backgroundColor: C.warmTint, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  emoji: { fontSize: 28 },
+  cardTitle: { fontSize: 20, fontWeight: '900', color: C.ink, marginBottom: 6 },
+  cardText: { fontSize: 14, lineHeight: 20, color: C.inkSoft, fontWeight: '500', marginBottom: 14 },
+  cardButton: { paddingVertical: 14, borderRadius: 16, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
+  cardButtonText: { fontSize: 15, fontWeight: '900', color: '#fff' },
+
   phoneCard: {
-    minHeight: 110,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    backgroundColor: C.surface,
-    borderRadius: 26,
-    borderWidth: 1,
-    borderColor: C.line,
-    padding: 18,
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: C.surface, borderRadius: 22, borderWidth: 1, borderColor: C.line, padding: 16,
   },
-  phoneTitle: { fontSize: 22, fontWeight: '900', color: C.ink },
-  phoneText: { fontSize: 17, lineHeight: 24, color: C.inkSoft, fontWeight: '700', marginTop: 3 },
-  chev: { fontSize: 32, color: C.warm, fontWeight: '700' },
-  truthCard: { marginTop: 'auto', marginBottom: 20, backgroundColor: C.listenTint, borderRadius: 22, padding: 18, borderWidth: 1, borderColor: '#2F8F7333' },
-  truthTitle: { fontSize: 18, fontWeight: '900', color: C.listen, marginBottom: 4 },
-  truthText: { fontSize: 16, lineHeight: 23, color: C.ink, fontWeight: '700' },
+  phoneTitle: { fontSize: 17, fontWeight: '800', color: C.ink },
+  phoneText: { fontSize: 13, lineHeight: 18, color: C.inkSoft, fontWeight: '500', marginTop: 2 },
+  chev: { fontSize: 24, color: C.warm, fontWeight: '700' },
+
+  truthCard: { marginTop: 20, backgroundColor: C.listenTint, borderRadius: 18, padding: 14, borderWidth: 1, borderColor: '#2F8F7333' },
+  truthTitle: { fontSize: 13, fontWeight: '900', color: C.listen, marginBottom: 4, letterSpacing: 0.3, textTransform: 'uppercase' },
+  truthText: { fontSize: 13, lineHeight: 18, color: C.ink, fontWeight: '500' },
 });

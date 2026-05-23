@@ -1,3 +1,4 @@
+import * as ExpoSpeech from 'expo-speech';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -9,20 +10,26 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import CallControls from '../components/CallControls';
 import CallPanel from '../components/CallPanel';
 import DisclaimerBanner from '../components/DisclaimerBanner';
+import LanguagePill from '../components/LanguagePill';
+import PendingBubble from '../components/PendingBubble';
 import TranscriptMessage from '../components/TranscriptMessage';
+import { useLanguage } from '../hooks/useLanguage';
 import { translateToEnglish, translateToSpanish } from '../services/claude';
 import { saveCall } from '../services/storage';
 import { transcribeAudio } from '../services/whisper';
 import type { CallRecord, TranscriptEntry } from '../types';
 import { CHUNK_DURATION_MS, startRecording, stopRecording } from '../utils/audio';
 import { generateId } from '../utils/format';
-import { hapticWarning } from '../utils/haptics';
+import { hapticLight, hapticWarning } from '../utils/haptics';
+import { getReadAloudDefault } from '../services/preferences';
+import { scanForSafetyFlags } from '../utils/safetyScan';
 
 const C = {
   bg: '#F4F1EB',
@@ -36,16 +43,90 @@ const C = {
   primaryTint: '#DCEAF6',
 };
 
+const L = {
+  es: {
+    privacy: '🔒 Conversación privada',
+    phoneModeTitle: '🔊 Use altavoz',
+    phoneModeText: 'MedLingua escucha el sonido de la llamada y traduce en esta pantalla.',
+    emptyTitle: 'Lista para traducir',
+    emptySub1: 'Toque ',
+    emptySub2: ' cuando hable el doctor.\nToque ',
+    emptySub3: ' cuando usted responda.',
+    boldDoctor: 'El doctor habla',
+    boldYou: 'Yo hablo',
+    step1: 'Doctor habla',
+    step2: 'Usted habla',
+    step3: 'Reciba resumen',
+    translateError: 'Error de traducción',
+    micError: 'Error del micrófono',
+    retranslateError: 'No se pudo traducir de nuevo',
+    noConversation: 'No hay conversación',
+    endAnyway: '¿Terminar la visita de todos modos?',
+    cancel: 'Cancelar',
+    finish: 'Terminar',
+    cleared: 'Conversación borrada',
+    clearedBody: 'Por seguridad, borramos la conversación abierta porque la app estuvo cerrada más de 1 minuto.',
+    home: 'Inicio',
+    stillSpeakingTitle: 'Aún está grabando',
+    stillSpeakingBody: 'Está hablando o escuchando. ¿Detener y terminar la visita?',
+    leaveTitle: '¿Salir de la visita?',
+    leaveBody: 'Perderá la conversación si no la guarda.',
+    stay: 'Quedarse',
+    leave: 'Salir',
+    saveAndLeave: 'Guardar y salir',
+    helpTitle: 'Cómo usar MedLingua',
+    helpPhone: '1. Ponga su llamada en altavoz.\n2. Toque "El doctor habla" cuando hable el doctor.\n3. Toque "Yo hablo" cuando usted responda.\n4. Toque "Terminar" para recibir su resumen.',
+    helpRoom: '1. Ponga el teléfono cerca de usted.\n2. Toque "El doctor habla" cuando hable el doctor.\n3. Toque "Yo hablo" cuando usted responda.\n4. Toque "Terminar" para recibir su resumen.',
+  },
+  en: {
+    privacy: '🔒 Private conversation',
+    phoneModeTitle: '🔊 Use speakerphone',
+    phoneModeText: 'MedLingua listens to your call audio and translates on this screen.',
+    emptyTitle: 'Ready to translate',
+    emptySub1: 'Tap ',
+    emptySub2: ' when the doctor speaks.\nTap ',
+    emptySub3: ' when you respond.',
+    boldDoctor: 'Doctor speaks',
+    boldYou: 'I speak',
+    step1: 'Doctor speaks',
+    step2: 'You speak',
+    step3: 'Get summary',
+    translateError: 'Translation error',
+    micError: 'Microphone error',
+    retranslateError: 'Could not re-translate',
+    noConversation: 'No conversation',
+    endAnyway: 'End the visit anyway?',
+    cancel: 'Cancel',
+    finish: 'End',
+    cleared: 'Conversation cleared',
+    clearedBody: 'For your privacy, we cleared the open conversation because the app was closed for more than 1 minute.',
+    home: 'Home',
+    stillSpeakingTitle: 'Still recording',
+    stillSpeakingBody: 'You\'re speaking or listening. Stop and end the visit?',
+    leaveTitle: 'Leave the visit?',
+    leaveBody: 'You\'ll lose this conversation if you don\'t save it.',
+    stay: 'Stay',
+    leave: 'Leave',
+    saveAndLeave: 'Save and leave',
+    helpTitle: 'How to use MedLingua',
+    helpPhone: '1. Put your call on speaker.\n2. Tap "Doctor speaks" when the doctor talks.\n3. Tap "I speak" when you respond.\n4. Tap "End" to get your summary.',
+    helpRoom: '1. Place the phone near you.\n2. Tap "Doctor speaks" when the doctor talks.\n3. Tap "I speak" when you respond.\n4. Tap "End" to get your summary.',
+  },
+};
+
 export default function CallScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
   const { number, mode } = useLocalSearchParams<{ number?: string; mode?: string }>();
   const isPhoneMode = mode === 'phone';
+  const { lang, toggle } = useLanguage();
+  const t = L[lang];
 
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [pendingRole, setPendingRole] = useState<'provider' | 'patient' | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaker, setIsSpeaker] = useState(false);
   const [callStartedAt] = useState(() => Date.now());
@@ -59,6 +140,10 @@ export default function CallScreen() {
 
   useEffect(() => {
     Audio.requestPermissionsAsync();
+    // Honor the user's "Read aloud by default" preference
+    getReadAloudDefault().then(on => { if (on) setIsSpeaker(true); });
+    // Stop any ongoing TTS when leaving the call screen
+    return () => { ExpoSpeech.stop(); };
   }, []);
 
   useEffect(() => {
@@ -84,10 +169,7 @@ export default function CallScreen() {
         if (awayForMs >= 60_000 && transcriptRef.current.length > 0) {
           hapticWarning();
           setTranscript([]);
-          Alert.alert(
-            'Conversación borrada',
-            'Por seguridad, borramos la conversación abierta porque la app estuvo cerrada más de 1 minuto.'
-          );
+          Alert.alert(t.cleared, t.clearedBody);
         }
       }
     }
@@ -109,32 +191,56 @@ export default function CallScreen() {
     if (next && isListening) await handleStopListening();
   }
 
-  async function toggleSpeaker() {
+  const isSpeakerRef = useRef(false);
+  useEffect(() => { isSpeakerRef.current = isSpeaker; }, [isSpeaker]);
+
+  function toggleSpeaker() {
     const next = !isSpeaker;
     setIsSpeaker(next);
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: !next,
-      playsInSilentModeIOS: true,
-    });
+    // If turning off, stop any active TTS
+    if (!next) ExpoSpeech.stop();
+  }
+
+  // Speak the translated text out loud, only if speaker is on.
+  // Provider translation is Spanish (for patient to hear).
+  // Patient translation is English (for doctor to hear).
+  function speakTranslation(text: string, role: 'provider' | 'patient') {
+    if (!isSpeakerRef.current || !text.trim()) return;
+    const ttsLang = role === 'provider' ? 'es-MX' : 'en-US';
+    ExpoSpeech.stop();
+    ExpoSpeech.speak(text, { language: ttsLang, rate: 0.92 });
+  }
+
+  // Stop any TTS playback before we start recording — avoids capturing our own voice.
+  function stopTTSBeforeRecording() {
+    ExpoSpeech.stop();
   }
 
   async function processProviderChunk(uri: string) {
+    setPendingRole('provider');
     try {
       const englishText = await transcribeAudio(uri, 'en');
-      if (!englishText.trim()) return;
+      if (!englishText.trim()) { setPendingRole(null); return; }
       const spanishText = await translateToSpanish(englishText);
+      const safetyFlags = scanForSafetyFlags(englishText, 'en-es');
       appendEntry({
         id: generateId(), role: 'provider',
         originalText: englishText, translatedText: spanishText,
         timestamp: Date.now(),
+        safetyFlags,
       });
+      // Read the Spanish translation aloud (for patient) if speaker is on
+      speakTranslation(spanishText, 'provider');
     } catch (err: any) {
-      Alert.alert('Error de traducción', err.message || String(err));
+      Alert.alert(t.translateError, err.message || String(err));
+    } finally {
+      setPendingRole(null);
     }
   }
 
   async function startChunkedListening() {
     if (isMuted) return;
+    stopTTSBeforeRecording();
     setIsListening(true);
     isListeningRef.current = true;
 
@@ -155,7 +261,7 @@ export default function CallScreen() {
       } catch (err: any) {
         setIsListening(false);
         isListeningRef.current = false;
-        Alert.alert('Error del micrófono', err.message);
+        Alert.alert(t.micError, err.message);
       }
     }
     recordChunk();
@@ -177,6 +283,7 @@ export default function CallScreen() {
 
   async function handleSpeakSpanish() {
     if (isSpeaking) return;
+    stopTTSBeforeRecording();
     setIsSpeaking(true);
     try {
       const rec = await startRecording();
@@ -184,7 +291,7 @@ export default function CallScreen() {
       (rec as any)._doneTimer = setTimeout(() => finishPatientRecording(), 30000);
     } catch (err: any) {
       setIsSpeaking(false);
-      Alert.alert('Error del micrófono', err.message);
+      Alert.alert(t.micError, err.message);
     }
   }
 
@@ -194,33 +301,36 @@ export default function CallScreen() {
     recordingRef.current = null;
     setIsSpeaking(false);
     setIsProcessing(true);
+    setPendingRole('patient');
     if ((rec as any)._doneTimer) clearTimeout((rec as any)._doneTimer);
     try {
       const uri = await stopRecording(rec);
       const spanishText = await transcribeAudio(uri, 'es');
-      if (!spanishText.trim()) { setIsProcessing(false); return; }
+      if (!spanishText.trim()) { setIsProcessing(false); setPendingRole(null); return; }
       const englishText = await translateToEnglish(spanishText);
+      const safetyFlags = scanForSafetyFlags(spanishText, 'es-en');
       appendEntry({
         id: generateId(), role: 'patient',
         originalText: spanishText, translatedText: englishText,
         timestamp: Date.now(),
+        safetyFlags,
       });
+      // Read the English translation aloud (for doctor) if speaker is on
+      speakTranslation(englishText, 'patient');
     } catch (err: any) {
-      Alert.alert('Error de traducción', err.message);
+      Alert.alert(t.translateError, err.message);
     } finally {
       setIsProcessing(false);
+      setPendingRole(null);
     }
   }
 
-  async function handleEndCall() {
+  async function doEndAndSave() {
     if (isListening) await handleStopListening();
     if (isSpeaking) await finishPatientRecording();
 
     if (transcript.length === 0) {
-      Alert.alert('No hay conversación', '¿Terminar la visita de todos modos?', [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Terminar', style: 'destructive', onPress: () => router.replace('/home') },
-      ]);
+      router.replace('/home');
       return;
     }
 
@@ -234,6 +344,54 @@ export default function CallScreen() {
     } catch { router.replace('/home'); }
   }
 
+  function handleEndCall() {
+    // If actively listening/speaking, confirm first
+    if (isListening || isSpeaking) {
+      hapticWarning();
+      Alert.alert(t.stillSpeakingTitle, t.stillSpeakingBody, [
+        { text: t.cancel, style: 'cancel' },
+        { text: t.finish, style: 'destructive', onPress: doEndAndSave },
+      ]);
+      return;
+    }
+
+    // If nothing recorded yet, confirm leaving empty
+    if (transcript.length === 0) {
+      Alert.alert(t.noConversation, t.endAnyway, [
+        { text: t.cancel, style: 'cancel' },
+        { text: t.finish, style: 'destructive', onPress: () => router.replace('/home') },
+      ]);
+      return;
+    }
+
+    // Has conversation, not currently speaking — save and go to summary
+    doEndAndSave();
+  }
+
+  function handleGoHome() {
+    hapticLight();
+    // Active recording → confirm and stop
+    if (isListening || isSpeaking) {
+      hapticWarning();
+      Alert.alert(t.stillSpeakingTitle, t.stillSpeakingBody, [
+        { text: t.cancel, style: 'cancel' },
+        { text: t.finish, style: 'destructive', onPress: doEndAndSave },
+      ]);
+      return;
+    }
+    // Has conversation → confirm leaving (or save)
+    if (transcript.length > 0) {
+      Alert.alert(t.leaveTitle, t.leaveBody, [
+        { text: t.stay, style: 'cancel' },
+        { text: t.saveAndLeave, onPress: doEndAndSave },
+        { text: t.leave, style: 'destructive', onPress: () => router.replace('/home') },
+      ]);
+      return;
+    }
+    // Nothing to lose, go straight home
+    router.replace('/home');
+  }
+
   async function handleEditEntry(id: string, newSpanish: string) {
     try {
       const newEnglish = await translateToEnglish(newSpanish);
@@ -241,17 +399,12 @@ export default function CallScreen() {
         e.id === id ? { ...e, originalText: newSpanish, translatedText: newEnglish } : e
       ));
     } catch (err: any) {
-      Alert.alert('No se pudo traducir de nuevo', err.message || String(err));
+      Alert.alert(t.retranslateError, err.message || String(err));
     }
   }
 
   function showCallHelp() {
-    Alert.alert(
-      'Cómo usar MedLingua',
-      isPhoneMode
-        ? '1. Ponga su llamada en altavoz.\n2. Toque "El doctor habla" cuando hable el doctor.\n3. Toque "Yo hablo" cuando usted responda.\n4. Toque "Terminar" para recibir su resumen.'
-        : '1. Ponga el teléfono cerca de usted.\n2. Toque "El doctor habla" cuando hable el doctor.\n3. Toque "Yo hablo" cuando usted responda.\n4. Toque "Terminar" para recibir su resumen.'
-    );
+    Alert.alert(t.helpTitle, isPhoneMode ? t.helpPhone : t.helpRoom);
   }
 
   return (
@@ -259,16 +412,22 @@ export default function CallScreen() {
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1 }}>
 
-        <DisclaimerBanner />
+        <DisclaimerBanner lang={lang} />
 
-        <View style={s.privacyBadge}>
-          <Text style={s.privacyText}>🔒 Conversación privada</Text>
+        <View style={s.topRow}>
+          <TouchableOpacity onPress={handleGoHome} style={s.homeBtn} activeOpacity={0.7}>
+            <Text style={s.homeBtnText}>← {t.home}</Text>
+          </TouchableOpacity>
+          <View style={s.privacyBadge}>
+            <Text style={s.privacyText}>{t.privacy}</Text>
+          </View>
+          <LanguagePill lang={lang} onToggle={toggle} />
         </View>
 
         {isPhoneMode && (
           <View style={s.phoneModeCard}>
-            <Text style={s.phoneModeTitle}>🔊 Use altavoz</Text>
-            <Text style={s.phoneModeText}>MedLingua escucha el sonido de la llamada y traduce en esta pantalla.</Text>
+            <Text style={s.phoneModeTitle}>{t.phoneModeTitle}</Text>
+            <Text style={s.phoneModeText}>{t.phoneModeText}</Text>
           </View>
         )}
 
@@ -279,6 +438,7 @@ export default function CallScreen() {
           dialedNumber={number || ''}
           isMuted={isMuted}
           isSpeaker={isSpeaker}
+          lang={lang}
           onShowHelp={showCallHelp}
           onEndCall={handleEndCall}
           onToggleMute={toggleMute}
@@ -296,17 +456,16 @@ export default function CallScreen() {
               <View style={s.emptyIconWrap}>
                 <Text style={{ fontSize: 32 }}>🌐</Text>
               </View>
-              <Text style={s.emptyTitle}>Lista para traducir</Text>
+              <Text style={s.emptyTitle}>{t.emptyTitle}</Text>
               <Text style={s.emptySub}>
-                Toque <Text style={s.emptyBold}>El doctor habla</Text> cuando hable el doctor.{'\n'}
-                Toque <Text style={s.emptyBoldWarm}>Yo hablo</Text> cuando usted responda.
+                {t.emptySub1}<Text style={s.emptyBold}>{t.boldDoctor}</Text>{t.emptySub2}<Text style={s.emptyBoldWarm}>{t.boldYou}</Text>{t.emptySub3}
               </Text>
 
               <View style={s.statsRow}>
                 {[
-                  { n: '1', label: 'Doctor habla' },
-                  { n: '2', label: 'Usted habla' },
-                  { n: '3', label: 'Reciba resumen' },
+                  { n: '1', label: t.step1 },
+                  { n: '2', label: t.step2 },
+                  { n: '3', label: t.step3 },
                 ].map(({ n, label }) => (
                   <View key={label} style={s.statTile}>
                     <Text style={s.statNum}>{n}</Text>
@@ -321,15 +480,19 @@ export default function CallScreen() {
             <TranscriptMessage
               key={entry.id}
               entry={entry}
+              lang={lang}
               onEdit={entry.role === 'patient' ? handleEditEntry : undefined}
             />
           ))}
+
+          {pendingRole && <PendingBubble role={pendingRole} lang={lang} />}
         </ScrollView>
 
         <CallControls
           isListening={isListening}
           isSpeaking={isSpeaking}
           isProcessing={isProcessing}
+          lang={lang}
           onStartListening={startChunkedListening}
           onStopListening={handleStopListening}
           onSpeakSpanish={isSpeaking ? finishPatientRecording : handleSpeakSpanish}
@@ -341,17 +504,32 @@ export default function CallScreen() {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: C.bg },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 6,
+  },
+  homeBtn: {
+    minHeight: 36, minWidth: 64,
+    paddingHorizontal: 10, paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1, borderColor: C.line,
+    backgroundColor: C.surface,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  homeBtnText: { fontSize: 14, color: C.primary, fontWeight: '900' },
   privacyBadge: {
-    alignSelf: 'center',
     backgroundColor: '#DCEAE2',
     borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    marginBottom: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderWidth: 1,
     borderColor: '#2F8F7333',
   },
-  privacyText: { fontSize: 16, color: '#2F8F73', fontWeight: '900' },
+  privacyText: { fontSize: 12, color: '#2F8F73', fontWeight: '800' },
   phoneModeCard: {
     marginHorizontal: 16,
     marginBottom: 8,

@@ -20,6 +20,45 @@ const C = {
   alertTint: '#F4DDD8',
 };
 
+type Lang = 'es' | 'en';
+
+const L = {
+  es: {
+    help: 'Ayuda',
+    end: 'Terminar',
+    connecting: 'Conectando...',
+    connected: '● Conectado',
+    failed: 'Falló',
+    doctor: 'Doctor',
+    you: 'Usted',
+    muted: 'Silenciado',
+    listening: 'Escuchando...',
+    ready: 'Listo',
+    speaking: 'Hablando...',
+    unmute: 'Activar micrófono',
+    mute: 'Silenciar',
+    speakerOn: 'Leer en voz alta',
+    speaker: 'Leer en voz alta',
+  },
+  en: {
+    help: 'Help',
+    end: 'End',
+    connecting: 'Connecting...',
+    connected: '● Connected',
+    failed: 'Failed',
+    doctor: 'Doctor',
+    you: 'You',
+    muted: 'Muted',
+    listening: 'Listening...',
+    ready: 'Ready',
+    speaking: 'Speaking...',
+    unmute: 'Unmute',
+    mute: 'Mute',
+    speakerOn: 'Read aloud',
+    speaker: 'Read aloud',
+  },
+};
+
 interface Props {
   isListening: boolean;
   isSpeaking: boolean;
@@ -28,6 +67,7 @@ interface Props {
   callStartedAt: number;
   dialedNumber?: string;
   callStatus?: 'idle' | 'connecting' | 'connected' | 'failed';
+  lang?: Lang;
   onShowHelp: () => void;
   onEndCall: () => void;
   onToggleMute: () => void;
@@ -36,9 +76,10 @@ interface Props {
 
 export default function CallPanel({
   isListening, isSpeaking, isMuted, isSpeaker,
-  callStartedAt, dialedNumber, callStatus,
+  callStartedAt, dialedNumber, callStatus, lang = 'es',
   onShowHelp, onEndCall, onToggleMute, onToggleSpeaker,
 }: Props) {
+  const L_ = L[lang];
   const [duration, setDuration] = useState('00:00');
 
   useEffect(() => {
@@ -71,7 +112,7 @@ export default function CallPanel({
           }}
           style={s.ghostBtn}
         >
-          <Text style={s.ghostBtnText}>Ayuda</Text>
+          <Text style={s.ghostBtnText}>{L_.help}</Text>
         </TouchableOpacity>
 
         <View style={s.timerPill}>
@@ -86,7 +127,7 @@ export default function CallPanel({
           }}
           style={s.endBtn}
         >
-          <Text style={s.endBtnText}>Terminar</Text>
+          <Text style={s.endBtnText}>{L_.end}</Text>
         </TouchableOpacity>
       </View>
 
@@ -94,9 +135,9 @@ export default function CallPanel({
       {dialedNumber ? (
         <View style={s.numberRow}>
           <Text style={s.numberText}>{fmt(dialedNumber)}</Text>
-          {callStatus === 'connecting' && <Text style={s.statusChip}>Conectando...</Text>}
-          {callStatus === 'connected' && <Text style={[s.statusChip, s.statusConnected]}>● Conectado</Text>}
-          {callStatus === 'failed' && <Text style={[s.statusChip, s.statusFailed]}>Falló</Text>}
+          {callStatus === 'connecting' && <Text style={s.statusChip}>{L_.connecting}</Text>}
+          {callStatus === 'connected' && <Text style={[s.statusChip, s.statusConnected]}>{L_.connected}</Text>}
+          {callStatus === 'failed' && <Text style={[s.statusChip, s.statusFailed]}>{L_.failed}</Text>}
         </View>
       ) : null}
 
@@ -106,9 +147,9 @@ export default function CallPanel({
           <View style={[s.avatarRing, isListening && !isMuted && s.ringBlue]}>
             <View style={s.avatar}><Text style={{ fontSize: 22 }}>👨‍⚕️</Text></View>
           </View>
-          <Text style={s.avatarName}>Doctor</Text>
+          <Text style={s.avatarName}>{L_.doctor}</Text>
           <Text style={[s.avatarStatus, isListening && !isMuted && s.statusBlue, isMuted && s.statusMuted]}>
-            {isMuted ? 'Silencio' : isListening ? 'Escuchando...' : 'Listo'}
+            {isMuted ? L_.muted : isListening ? L_.listening : L_.ready}
           </Text>
         </View>
 
@@ -122,9 +163,9 @@ export default function CallPanel({
           <View style={[s.avatarRing, isSpeaking && s.ringWarm]}>
             <View style={s.avatar}><Text style={{ fontSize: 22 }}>🧑🏽</Text></View>
           </View>
-          <Text style={s.avatarName}>Usted</Text>
+          <Text style={s.avatarName}>{L_.you}</Text>
           <Text style={[s.avatarStatus, isSpeaking && s.statusWarm]}>
-            {isSpeaking ? 'Hablando...' : 'Listo'}
+            {isSpeaking ? L_.speaking : L_.ready}
           </Text>
         </View>
       </View>
@@ -140,7 +181,7 @@ export default function CallPanel({
           activeOpacity={0.7}
         >
           <Text style={s.ctrlIcon}>{isMuted ? '🔇' : '🎙'}</Text>
-          <Text style={[s.ctrlLabel, isMuted && { color: C.alert }]}>{isMuted ? 'Activar micrófono' : 'Silenciar'}</Text>
+          <Text style={[s.ctrlLabel, isMuted && { color: C.alert }]}>{isMuted ? L_.unmute : L_.mute}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -152,7 +193,7 @@ export default function CallPanel({
           activeOpacity={0.7}
         >
           <Text style={s.ctrlIcon}>{isSpeaker ? '🔊' : '🔈'}</Text>
-          <Text style={[s.ctrlLabel, isSpeaker && { color: C.primary }]}>{isSpeaker ? 'Altavoz activo' : 'Altavoz'}</Text>
+          <Text style={[s.ctrlLabel, isSpeaker && { color: C.primary }]}>{isSpeaker ? L_.speakerOn : L_.speaker}</Text>
         </TouchableOpacity>
       </View>
     </View>

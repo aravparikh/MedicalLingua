@@ -1,7 +1,8 @@
 import { Audio } from 'expo-av';
 import { DeviceEventEmitter } from 'react-native';
 
-export const CHUNK_DURATION_MS = 7000;
+// Shorter chunks = faster perceived latency. 4.5s balances transcription accuracy with snappy UX.
+export const CHUNK_DURATION_MS = 4500;
 
 const RECORDING_OPTIONS: Audio.RecordingOptions = {
   isMeteringEnabled: true,

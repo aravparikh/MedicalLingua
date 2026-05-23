@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AudioWaveform from './AudioWaveform';
 import { hapticMedium } from '../utils/haptics';
 
 const C = {
@@ -25,10 +26,36 @@ const C = {
   warmTint: '#F3E2D2',
 };
 
+type Lang = 'es' | 'en';
+
+const L = {
+  es: {
+    translating: 'Traduciendo...',
+    doctorSpeaks: 'El doctor habla',
+    done: 'Listo',
+    listening: 'Escuchando...',
+    doctorSub: 'Inglés a español',
+    youSpeak: 'Yo hablo',
+    recording: 'Grabando...',
+    youSub: 'Español a inglés',
+  },
+  en: {
+    translating: 'Translating...',
+    doctorSpeaks: 'Doctor speaks',
+    done: 'Done',
+    listening: 'Listening...',
+    doctorSub: 'English → Spanish',
+    youSpeak: 'I speak',
+    recording: 'Recording...',
+    youSub: 'Spanish → English',
+  },
+};
+
 interface Props {
   isListening: boolean;
   isSpeaking: boolean;
   isProcessing: boolean;
+  lang?: Lang;
   onStartListening: () => void;
   onStopListening: () => void;
   onSpeakSpanish: () => void;
@@ -61,7 +88,8 @@ function PulseRing({ color, active }: { color: string; active: boolean }) {
   );
 }
 
-export default function CallControls({ isListening, isSpeaking, isProcessing, onStartListening, onStopListening, onSpeakSpanish }: Props) {
+export default function CallControls({ isListening, isSpeaking, isProcessing, lang = 'es', onStartListening, onStopListening, onSpeakSpanish }: Props) {
+  const L_ = L[lang];
   const micScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -76,12 +104,23 @@ export default function CallControls({ isListening, isSpeaking, isProcessing, on
     return () => sub.remove();
   }, [isListening, isSpeaking]);
 
+  const recording = isListening || isSpeaking;
+
   return (
     <View style={s.wrap}>
+      {recording && (
+        <View style={s.waveformRow}>
+          <AudioWaveform
+            active={recording}
+            color={isListening ? C.primary : C.warm}
+          />
+        </View>
+      )}
+
       {isProcessing && (
         <View style={s.processingRow}>
           <ActivityIndicator size="small" color={C.primary} />
-          <Text style={s.processingText}>Traduciendo...</Text>
+          <Text style={s.processingText}>{L_.translating}</Text>
         </View>
       )}
 
@@ -102,9 +141,9 @@ export default function CallControls({ isListening, isSpeaking, isProcessing, on
             <Text style={s.btnIcon}>{isListening ? '⏹' : '🩺'}</Text>
           </Animated.View>
           <Text style={[s.btnLabel, { color: C.primary }]}>
-            {isListening ? 'Listo' : 'El doctor habla'}
+            {isListening ? L_.done : L_.doctorSpeaks}
           </Text>
-          <Text style={s.btnSub}>{isListening ? 'Escuchando...' : 'Inglés a español'}</Text>
+          <Text style={s.btnSub}>{isListening ? L_.listening : L_.doctorSub}</Text>
         </TouchableOpacity>
 
         {/* Patient */}
@@ -122,9 +161,9 @@ export default function CallControls({ isListening, isSpeaking, isProcessing, on
             <Text style={s.btnIcon}>{isSpeaking ? '⏹' : '🗣️'}</Text>
           </Animated.View>
           <Text style={[s.btnLabel, { color: C.warm }]}>
-            {isSpeaking ? 'Listo' : 'Yo hablo'}
+            {isSpeaking ? L_.done : L_.youSpeak}
           </Text>
-          <Text style={s.btnSub}>{isSpeaking ? 'Grabando...' : 'Español a inglés'}</Text>
+          <Text style={s.btnSub}>{isSpeaking ? L_.recording : L_.youSub}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -139,6 +178,10 @@ const s = StyleSheet.create({
     backgroundColor: C.bg,
     borderTopWidth: 1,
     borderTopColor: '#E5DFD2',
+  },
+  waveformRow: {
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 10,
   },
   processingRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',

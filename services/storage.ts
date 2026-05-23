@@ -26,3 +26,7 @@ export async function deleteCall(id: string): Promise<void> {
   const updated = existing.filter((c) => c.id !== id);
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 }
+
+export async function clearAllCalls(): Promise<void> {
+  await AsyncStorage.removeItem(STORAGE_KEY);
+}

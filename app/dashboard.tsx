@@ -1,7 +1,6 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -10,6 +9,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import BottomNav from '../components/BottomNav';
+import BrandLoader from '../components/BrandLoader';
+import LanguagePill from '../components/LanguagePill';
+import { useLanguage } from '../hooks/useLanguage';
 import { loadCalls } from '../services/storage';
 import type { CallRecord, Medication } from '../types';
 import { formatTimestamp } from '../utils/format';
@@ -36,6 +39,49 @@ const C = {
   listenTint: '#DCEAE2',
   alert: '#B5443A',
   alertTint: '#F4DDD8',
+};
+
+type Lang = 'es' | 'en';
+
+const L = {
+  es: {
+    appbarSub: (n: number) => `De ${n} visita${n !== 1 ? 's' : ''}`,
+    appbarTitle: 'Mi salud',
+    statsVisits: 'Visitas',
+    statsMeds: 'Medicinas',
+    statsAppts: 'Citas',
+    sectionMeds: '💊 Medicinas activas',
+    sectionAppts: '📅 Citas próximas',
+    sectionInstructions: '✅ Instrucciones para casa',
+    noMeds: 'Todavía no hay medicinas. Aparecerán aquí después de su primera visita con resumen.',
+    noAppts: 'Todavía no hay citas. Aparecerán aquí si su doctor menciona una próxima visita.',
+    noInstructions: 'Todavía no hay instrucciones. Las notas del doctor aparecerán aquí después de cada visita.',
+    visitBtn: 'Visita ›',
+    mentionedAt: 'Mencionada en la visita · ',
+    seeVisit: 'Ver visita ›',
+    noVisitsTitle: 'Todavía no hay visitas',
+    noVisitsSub: 'Inicie una visita con su doctor. Después, MedLingua guardará sus medicinas, citas e instrucciones aquí.',
+    noVisitsCta: 'Iniciar visita →',
+  },
+  en: {
+    appbarSub: (n: number) => `From ${n} visit${n !== 1 ? 's' : ''}`,
+    appbarTitle: 'My Health',
+    statsVisits: 'Visits',
+    statsMeds: 'Medications',
+    statsAppts: 'Appointments',
+    sectionMeds: '💊 Active Medications',
+    sectionAppts: '📅 Upcoming Appointments',
+    sectionInstructions: '✅ Home Instructions',
+    noMeds: 'No medications yet. They will appear here after your first visit with a summary.',
+    noAppts: 'No appointments yet. They will appear here if your doctor mentions a follow-up visit.',
+    noInstructions: 'No instructions yet. Doctor\'s notes will appear here after each visit.',
+    visitBtn: 'Visit ›',
+    mentionedAt: 'Mentioned in visit · ',
+    seeVisit: 'See visit ›',
+    noVisitsTitle: 'No visits yet',
+    noVisitsSub: 'Start a visit with your doctor. MedLingua will save your medications, appointments, and instructions here.',
+    noVisitsCta: 'Start a visit →',
+  },
 };
 
 interface MedEntry extends Medication {
@@ -78,6 +124,9 @@ function EmptyCard({ emoji, message }: { emoji: string; message: string }) {
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const { lang, toggle } = useLanguage();
+  const t = L[lang];
+
   const [loading, setLoading] = useState(true);
   const [meds, setMeds] = useState<MedEntry[]>([]);
   const [appts, setAppts] = useState<ApptEntry[]>([]);
@@ -104,7 +153,7 @@ export default function DashboardScreen() {
           });
           setMeds(Array.from(medMap.values()).sort((a, b) => b.fromDate - a.fromDate));
 
-          // Citas
+          // Appointments
           const apptList: ApptEntry[] = [];
           calls.forEach(c => {
             if (c.summary?.appointmentTime) {
@@ -140,7 +189,7 @@ export default function DashboardScreen() {
     return (
       <View style={styles.screen}>
         <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <ActivityIndicator color={C.primary} />
+          <BrandLoader size="lg" />
         </SafeAreaView>
       </View>
     );
@@ -153,24 +202,22 @@ export default function DashboardScreen() {
 
         {/* App bar */}
         <View style={styles.appbar}>
-          <TouchableOpacity style={styles.appbarBtn} onPress={() => router.back()}>
-            <Text style={{ fontSize: 18, color: C.ink2 }}>←</Text>
-          </TouchableOpacity>
+          <View style={{ width: 44 }} />
           <View style={{ alignItems: 'center' }}>
-            <Text style={styles.appbarSub}>De {visitCount} visita{visitCount !== 1 ? 's' : ''}</Text>
-            <Text style={styles.appbarTitle}>Mi salud</Text>
+            <Text style={styles.appbarSub}>{t.appbarSub(visitCount)}</Text>
+            <Text style={styles.appbarTitle}>{t.appbarTitle}</Text>
           </View>
-          <View style={styles.appbarBtn} />
+          <LanguagePill lang={lang} onToggle={toggle} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
           {/* Stats row */}
           <View style={styles.statsRow}>
             {[
-              { label: 'Visitas', value: visitCount, color: C.primary, tint: C.primaryTint },
-              { label: 'Medicinas', value: meds.length, color: C.warm, tint: C.warmTint },
-              { label: 'Citas', value: appts.length, color: C.listen, tint: C.listenTint },
+              { label: t.statsVisits, value: visitCount, color: C.primary, tint: C.primaryTint },
+              { label: t.statsMeds, value: meds.length, color: C.warm, tint: C.warmTint },
+              { label: t.statsAppts, value: appts.length, color: C.listen, tint: C.listenTint },
             ].map(({ label, value, color, tint }) => (
               <View key={label} style={[styles.statTile, { backgroundColor: tint, borderColor: color + '33' }]}>
                 <Text style={[styles.statValue, { color }]}>{value}</Text>
@@ -179,10 +226,10 @@ export default function DashboardScreen() {
             ))}
           </View>
 
-          {/* Medicinas */}
-          <Section title="💊 Active Medicinas">
+          {/* Medications */}
+          <Section title={t.sectionMeds}>
             {meds.length === 0 ? (
-              <EmptyCard emoji="💊" message="Todavía no hay medicinas. Aparecerán aquí después de su primera visita con resumen." />
+              <EmptyCard emoji="💊" message={t.noMeds} />
             ) : (
               <View style={styles.card}>
                 {meds.map((m, i) => (
@@ -198,7 +245,7 @@ export default function DashboardScreen() {
                       onPress={() => router.push({ pathname: '/summary', params: { id: m.visitId } })}
                       style={styles.medVisitBtn}
                     >
-                      <Text style={styles.medVisitBtnText}>Visita ›</Text>
+                      <Text style={styles.medVisitBtnText}>{t.visitBtn}</Text>
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -206,10 +253,10 @@ export default function DashboardScreen() {
             )}
           </Section>
 
-          {/* Citas */}
-          <Section title="📅 Upcoming Citas">
+          {/* Appointments */}
+          <Section title={t.sectionAppts}>
             {appts.length === 0 ? (
-              <EmptyCard emoji="📅" message="Todavía no hay citas. Aparecerán aquí si su doctor menciona una próxima visita." />
+              <EmptyCard emoji="📅" message={t.noAppts} />
             ) : (
               <View style={styles.card}>
                 {appts.map((a, i) => (
@@ -224,7 +271,7 @@ export default function DashboardScreen() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.apptTime}>{a.time}</Text>
-                      <Text style={styles.apptFrom}>Mencionada en la visita · {formatTimestamp(a.fromDate)}</Text>
+                      <Text style={styles.apptFrom}>{t.mentionedAt}{formatTimestamp(a.fromDate, lang)}</Text>
                     </View>
                     <Text style={{ color: C.inkFaint, fontSize: 18 }}>›</Text>
                   </TouchableOpacity>
@@ -234,9 +281,9 @@ export default function DashboardScreen() {
           </Section>
 
           {/* Follow-up instructions */}
-          <Section title="✅ Instrucciones para casa">
+          <Section title={t.sectionInstructions}>
             {insights.length === 0 ? (
-              <EmptyCard emoji="✅" message="Todavía no hay instrucciones. Las notas del doctor aparecerán aquí después de cada visita." />
+              <EmptyCard emoji="✅" message={t.noInstructions} />
             ) : (
               insights.map((ins, gi) => (
                 <View key={gi} style={[styles.card, gi > 0 && { marginTop: 8 }]}>
@@ -245,8 +292,8 @@ export default function DashboardScreen() {
                     onPress={() => router.push({ pathname: '/summary', params: { id: ins.visitId } })}
                     activeOpacity={0.75}
                   >
-                    <Text style={styles.insightDate}>{formatTimestamp(ins.date)}</Text>
-                    <Text style={{ color: C.primary, fontSize: 16, fontWeight: '900' }}>Ver visita ›</Text>
+                    <Text style={styles.insightDate}>{formatTimestamp(ins.date, lang)}</Text>
+                    <Text style={{ color: C.primary, fontSize: 16, fontWeight: '900' }}>{t.seeVisit}</Text>
                   </TouchableOpacity>
                   {ins.rawText ? (
                     <Text style={styles.insightOverview}>{ins.rawText}</Text>
@@ -273,18 +320,17 @@ export default function DashboardScreen() {
           {visitCount === 0 && (
             <View style={styles.noVisitasCard}>
               <Text style={styles.noVisitasEmoji}>🩺</Text>
-              <Text style={styles.noVisitasTitle}>Todavía no hay visitas</Text>
-              <Text style={styles.noVisitasSub}>
-                Inicie una visita con su doctor. Después, MedLingua guardará sus medicinas, citas e instrucciones aquí.
-              </Text>
+              <Text style={styles.noVisitasTitle}>{t.noVisitsTitle}</Text>
+              <Text style={styles.noVisitasSub}>{t.noVisitsSub}</Text>
               <TouchableOpacity style={styles.noVisitasCta} onPress={() => router.push('/dial')}>
-                <Text style={styles.noVisitasCtaText}>Iniciar visita →</Text>
+                <Text style={styles.noVisitasCtaText}>{t.noVisitsCta}</Text>
               </TouchableOpacity>
             </View>
           )}
 
-          <View style={{ height: 40 }} />
+          <View style={{ height: 16 }} />
         </ScrollView>
+        <BottomNav active="history" lang={lang} />
       </SafeAreaView>
     </View>
   );
