@@ -32,7 +32,7 @@ const C = {
   ink: '#1A1B1F',
   ink2: '#2E3138',
   inkSoft: '#555960',
-  inkMute: '#8A8E96',
+  inkMute: '#666A73',
   primary: '#0F5BA8',
   primaryStrong: '#0A4682',
   primaryTint: '#DCEAF6',
@@ -317,20 +317,20 @@ const s = StyleSheet.create({
     paddingHorizontal: 18, paddingTop: 6, paddingBottom: 4,
   },
   backBtn: {
-    minHeight: 40, paddingHorizontal: 12, paddingVertical: 6,
-    borderRadius: 12, borderWidth: 1, borderColor: C.line,
+    minHeight: 48, paddingHorizontal: 12, paddingVertical: 6,
+    borderRadius: 14, borderWidth: 1, borderColor: C.line,
     backgroundColor: C.surface,
     alignItems: 'center', justifyContent: 'center',
   },
-  backText: { fontSize: 14, color: C.primary, fontWeight: '900' },
+  backText: { fontSize: 16, color: C.primary, fontWeight: '900' },
 
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 24 },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 110 },
   eyebrow: {
-    fontSize: 12, fontWeight: '900', color: C.warm,
+    fontSize: 16, fontWeight: '900', color: C.warm,
     letterSpacing: 1.4, marginTop: 14, marginBottom: 6,
   },
   title: { fontSize: 30, lineHeight: 35, fontWeight: '900', color: C.ink, letterSpacing: -0.6 },
-  subtitle: { fontSize: 15, lineHeight: 21, color: C.inkSoft, marginTop: 8, marginBottom: 18, fontWeight: '500' },
+  subtitle: { fontSize: 16, lineHeight: 22, color: C.inkSoft, marginTop: 8, marginBottom: 18, fontWeight: '500' },
 
   inputCard: {
     backgroundColor: C.surface,
@@ -341,32 +341,32 @@ const s = StyleSheet.create({
   },
   input: {
     minHeight: 80, maxHeight: 140,
-    fontSize: 17, lineHeight: 23, color: C.ink, fontWeight: '600',
+    fontSize: 18, lineHeight: 24, color: C.ink, fontWeight: '600',
     paddingHorizontal: 0, paddingVertical: 4,
     textAlignVertical: 'top',
   },
   runBtn: {
-    minHeight: 50, borderRadius: 14,
+    minHeight: 60, borderRadius: 14,
     backgroundColor: C.primary,
     alignItems: 'center', justifyContent: 'center',
     shadowColor: C.primary, shadowOpacity: 0.28, shadowRadius: 12, shadowOffset: { width: 0, height: 6 },
     elevation: 5,
   },
   runBtnDisabled: { backgroundColor: '#B5B3AB', shadowOpacity: 0 },
-  runText: { fontSize: 17, color: '#FFF', fontWeight: '900', letterSpacing: 0.3 },
+  runText: { fontSize: 18, color: '#FFF', fontWeight: '900', letterSpacing: 0.3 },
 
   presets: { marginTop: 22, gap: 8 },
   presetLabel: {
-    fontSize: 12, fontWeight: '900', color: C.inkMute,
+    fontSize: 16, fontWeight: '900', color: C.inkMute,
     letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 4,
   },
   presetChip: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     backgroundColor: C.surface,
     borderRadius: 14, borderWidth: 1, borderColor: C.line,
-    paddingHorizontal: 14, paddingVertical: 12,
+    paddingHorizontal: 14, paddingVertical: 12, minHeight: 48,
   },
-  presetText: { flex: 1, fontSize: 14, color: C.ink2, fontWeight: '700' },
+  presetText: { flex: 1, fontSize: 16, color: C.ink2, fontWeight: '700' },
   presetArrow: { fontSize: 20, color: C.inkMute, fontWeight: '700' },
 
   results: { marginTop: 18, gap: 12 },
@@ -394,14 +394,14 @@ const s = StyleSheet.create({
   },
   mlLogo: { fontSize: 22 },
   cardTitle: { fontSize: 16, fontWeight: '900', color: C.ink, letterSpacing: -0.2 },
-  cardSubcaption: { fontSize: 12, color: C.inkSoft, fontWeight: '700', marginTop: 1 },
+  cardSubcaption: { fontSize: 14, color: C.inkSoft, fontWeight: '700', marginTop: 1 },
   cardBadge: {
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
   },
   googleBadge: { backgroundColor: '#B5443A' },
-  googleBadgeText: { fontSize: 9, color: '#FFF', fontWeight: '900', letterSpacing: 0.5 },
+  googleBadgeText: { fontSize: 12, color: '#FFF', fontWeight: '900', letterSpacing: 0.5 },
   mlBadge: { backgroundColor: C.listen },
-  mlBadgeText: { fontSize: 9, color: '#FFF', fontWeight: '900', letterSpacing: 0.5 },
+  mlBadgeText: { fontSize: 12, color: '#FFF', fontWeight: '900', letterSpacing: 0.5 },
 
   translationText: {
     fontSize: 19, lineHeight: 26, color: C.ink,
@@ -415,12 +415,12 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(181, 68, 58, 0.12)',
     borderWidth: 1, borderColor: 'rgba(181, 68, 58, 0.3)',
   },
-  flagBannerText: { fontSize: 13, color: '#B5443A', fontWeight: '900' },
+  flagBannerText: { fontSize: 16, color: '#B5443A', fontWeight: '900' },
   safeBanner: {
     backgroundColor: 'rgba(47, 143, 115, 0.16)',
     borderColor: 'rgba(47, 143, 115, 0.35)',
   },
-  safeBannerText: { fontSize: 13, color: '#256E58', fontWeight: '900' },
+  safeBannerText: { fontSize: 16, color: '#256E58', fontWeight: '900' },
 
   flagsList: { gap: 8 },
   flagItem: {
@@ -428,15 +428,15 @@ const s = StyleSheet.create({
     borderRadius: 12, padding: 12,
     borderLeftWidth: 4, borderLeftColor: C.listen,
   },
-  flagItemTitle: { fontSize: 14, fontWeight: '900', color: '#256E58', marginBottom: 4 },
-  flagItemDetail: { fontSize: 13, lineHeight: 18, color: C.ink2, fontWeight: '600' },
+  flagItemTitle: { fontSize: 16, fontWeight: '900', color: '#256E58', marginBottom: 4 },
+  flagItemDetail: { fontSize: 16, lineHeight: 22, color: C.ink2, fontWeight: '600' },
 
   shareBtn: {
-    marginTop: 6, minHeight: 56, borderRadius: 18,
+    marginTop: 6, minHeight: 60, borderRadius: 18,
     backgroundColor: C.ink,
     alignItems: 'center', justifyContent: 'center',
     shadowColor: C.ink, shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 6 },
     elevation: 5,
   },
-  shareText: { fontSize: 16, color: '#FFF', fontWeight: '900', letterSpacing: 0.3 },
+  shareText: { fontSize: 18, color: '#FFF', fontWeight: '900', letterSpacing: 0.3 },
 });

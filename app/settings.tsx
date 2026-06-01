@@ -37,7 +37,7 @@ const C = {
   ink: '#1A1B1F',
   ink2: '#2E3138',
   inkSoft: '#555960',
-  inkMute: '#8A8E96',
+  inkMute: '#666A73',
   inkFaint: '#B5B3AB',
   primary: '#0F5BA8',
   primaryStrong: '#0A4682',
@@ -518,7 +518,7 @@ const s = StyleSheet.create({
   backText: { fontSize: 14, color: C.primary, fontWeight: '900' },
   titleBar: { flex: 1, fontSize: 20, fontWeight: '900', color: C.ink, textAlign: 'center', letterSpacing: -0.3 },
 
-  scroll: { paddingHorizontal: 18, paddingBottom: 24 },
+  scroll: { paddingHorizontal: 18, paddingBottom: 110 },
 
   sectionLabel: {
     fontSize: 12, fontWeight: '900', color: C.inkMute,

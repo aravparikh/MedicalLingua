@@ -15,6 +15,7 @@ export default function LanguagePill({ lang, onToggle, variant = 'light' }: Prop
       style={[s.pill, isDark && s.pillDark]}
       onPress={onToggle}
       activeOpacity={0.7}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       accessibilityLabel={`Change language to ${lang === 'es' ? 'English' : 'Spanish'}`}
     >
       <Text style={[s.option, lang === 'es' && s.optionActive, isDark && lang !== 'es' && s.optionDark]}>ES</Text>
@@ -34,6 +35,7 @@ const s = StyleSheet.create({
     borderColor: '#E5DFD2',
     paddingHorizontal: 4,
     paddingVertical: 4,
+    minHeight: 48,
     shadowColor: '#1E2850',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -42,9 +44,9 @@ const s = StyleSheet.create({
   },
   pillDark: { backgroundColor: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.18)' },
   option: {
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '800',
-    color: '#B5B3AB',
+    color: '#666A73',
     paddingHorizontal: 10,
     paddingVertical: 6,
     letterSpacing: 0.5,

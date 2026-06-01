@@ -28,8 +28,8 @@ const C = {
   line: '#E5DFD2',
   ink: '#1A1B1F',
   ink2: '#2E3138',
-  inkSoft: '#555960',
-  inkMute: '#8A8E96',
+  inkSoft: '#4A4E54',
+  inkMute: '#666A73',
   primary: '#0F5BA8',
   primaryStrong: '#0A4682',
   primaryTint: '#DCEAF6',
@@ -359,7 +359,7 @@ export default function HomeScreen() {
               <Text style={s.lastIcon}>📋</Text>
             </View>
 
-            <Text style={s.lastSummary} numberOfLines={4}>{getLastSummary(lastCall)}</Text>
+            <Text style={s.lastSummary}>{getLastSummary(lastCall)}</Text>
 
             {lastCall ? (
               <View style={s.lastActions}>
@@ -384,9 +384,18 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               </View>
             ) : (
-              <View style={s.noVisitHint}>
-                <Text style={s.noVisitHintText}>{t.noVisitHint}</Text>
-              </View>
+              <TouchableOpacity
+                style={s.noVisitHeroBtn}
+                onPress={() => startVisit('room')}
+                activeOpacity={0.85}
+              >
+                <Text style={s.noVisitHeroEmoji}>🏥</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.noVisitHeroTitle}>{t.inPersonCta}</Text>
+                  <Text style={s.noVisitHeroSub}>{t.noVisits}</Text>
+                </View>
+                <Text style={s.noVisitHeroArrow}>→</Text>
+              </TouchableOpacity>
             )}
           </View>
 
@@ -437,7 +446,7 @@ export default function HomeScreen() {
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: C.bg },
   safe: { flex: 1 },
-  scrollContent: { paddingHorizontal: 18, paddingBottom: 16, flexGrow: 1 },
+  scrollContent: { paddingHorizontal: 18, paddingBottom: 110, flexGrow: 1 },
 
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 6, paddingBottom: 4 },
   logoMark: {
@@ -447,20 +456,20 @@ const s = StyleSheet.create({
   },
   logoEmoji: { fontSize: 24 },
   wordmark: { fontSize: 20, fontWeight: '900', color: C.ink, letterSpacing: -0.2 },
-  privacy: { fontSize: 13, fontWeight: '800', color: C.listen, marginTop: 2 },
+  privacy: { fontSize: 16, fontWeight: '800', color: C.listen, marginTop: 2 },
 
   hero: { paddingTop: 18, paddingBottom: 14 },
   kickerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, gap: 10 },
-  kicker: { fontSize: 13, fontWeight: '900', color: C.warm, letterSpacing: 0.4, textTransform: 'uppercase' },
+  kicker: { fontSize: 16, fontWeight: '900', color: C.warm, letterSpacing: 0.4, textTransform: 'uppercase' },
   poweredPill: {
-    paddingHorizontal: 10, paddingVertical: 4,
+    paddingHorizontal: 10, paddingVertical: 6,
     borderRadius: 999,
     borderWidth: 1, borderColor: C.line,
     backgroundColor: C.surface,
   },
-  poweredText: { fontSize: 10, fontWeight: '900', color: C.inkMute, letterSpacing: 0.6 },
+  poweredText: { fontSize: 14, fontWeight: '900', color: C.inkMute, letterSpacing: 0.6 },
   title: { fontSize: 30, lineHeight: 35, fontWeight: '900', color: C.ink, letterSpacing: -0.6 },
-  subtitle: { fontSize: 15, lineHeight: 21, color: C.inkSoft, marginTop: 10, fontWeight: '500' },
+  subtitle: { fontSize: 17, lineHeight: 24, color: C.inkSoft, marginTop: 10, fontWeight: '500' },
 
   // Differentiation strip
   diffStrip: {
@@ -473,22 +482,22 @@ const s = StyleSheet.create({
     shadowOpacity: 0.05, shadowRadius: 10, elevation: 2,
   },
   diffStripTitle: {
-    fontSize: 12, fontWeight: '900', color: C.inkMute,
+    fontSize: 16, fontWeight: '900', color: C.inkMute,
     letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 12,
   },
-  diffList: { gap: 12 },
+  diffList: { gap: 14 },
   diffItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   diffIcon: {
-    width: 38, height: 38, borderRadius: 12,
+    width: 44, height: 44, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
-  diffIconEmoji: { fontSize: 20 },
-  diffItemTitle: { fontSize: 15, fontWeight: '900', color: C.ink, marginBottom: 2 },
-  diffItemBody: { fontSize: 13, lineHeight: 18, color: C.inkSoft, fontWeight: '600' },
+  diffIconEmoji: { fontSize: 24 },
+  diffItemTitle: { fontSize: 18, fontWeight: '900', color: C.ink, marginBottom: 4 },
+  diffItemBody: { fontSize: 16, lineHeight: 22, color: C.inkSoft, fontWeight: '600' },
 
   // Quick actions row
   quickActionsLabel: {
-    fontSize: 12, fontWeight: '900', color: C.inkMute,
+    fontSize: 16, fontWeight: '900', color: C.inkMute,
     letterSpacing: 0.6, textTransform: 'uppercase',
     marginTop: 18, marginBottom: 10, paddingHorizontal: 4,
   },
@@ -497,17 +506,17 @@ const s = StyleSheet.create({
     flex: 1, padding: 14,
     backgroundColor: C.surface,
     borderRadius: 18, borderWidth: 1, borderColor: C.line,
-    gap: 6,
+    gap: 8,
     shadowColor: '#1E2850', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
   },
   quickIcon: {
-    width: 38, height: 38, borderRadius: 12,
+    width: 44, height: 44, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  quickIconEmoji: { fontSize: 20 },
-  quickTitle: { fontSize: 15, fontWeight: '900', color: C.ink, lineHeight: 19 },
-  quickBody: { fontSize: 12, lineHeight: 16, color: C.inkSoft, fontWeight: '600' },
+  quickIconEmoji: { fontSize: 24 },
+  quickTitle: { fontSize: 17, fontWeight: '900', color: C.ink, lineHeight: 21 },
+  quickBody: { fontSize: 16, lineHeight: 22, color: C.inkSoft, fontWeight: '600' },
 
   modeGrid: { gap: 12 },
   modeCard: {
@@ -534,16 +543,16 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   modeEmoji: { fontSize: 26 },
-  modeTitlePrimary: { fontSize: 22, lineHeight: 26, fontWeight: '900', color: '#fff', letterSpacing: -0.2 },
-  modeBodyPrimary: { fontSize: 14, lineHeight: 19, color: '#EAF4FF', fontWeight: '600', marginTop: 2, marginBottom: 10 },
+  modeTitlePrimary: { fontSize: 24, lineHeight: 28, fontWeight: '900', color: '#fff', letterSpacing: -0.2 },
+  modeBodyPrimary: { fontSize: 16, lineHeight: 22, color: '#EAF4FF', fontWeight: '600', marginTop: 4, marginBottom: 12 },
   modePillPrimary: {
     borderRadius: 999, backgroundColor: '#FFFFFF',
     alignItems: 'center', justifyContent: 'center',
-    paddingHorizontal: 18, paddingVertical: 10,
+    paddingHorizontal: 20, paddingVertical: 12,
   },
-  modePillPrimaryText: { fontSize: 14, color: C.primaryStrong, fontWeight: '900' },
-  modeTitle: { fontSize: 17, lineHeight: 21, fontWeight: '800', color: C.ink },
-  modeBody: { fontSize: 13, lineHeight: 17, color: C.inkSoft, fontWeight: '500', marginTop: 2 },
+  modePillPrimaryText: { fontSize: 16, color: C.primaryStrong, fontWeight: '900' },
+  modeTitle: { fontSize: 18, lineHeight: 22, fontWeight: '800', color: C.ink },
+  modeBody: { fontSize: 16, lineHeight: 22, color: C.inkSoft, fontWeight: '500', marginTop: 4 },
   modeArrow: { fontSize: 26, color: C.warm, fontWeight: '800' },
 
   lastCard: {
@@ -553,38 +562,45 @@ const s = StyleSheet.create({
     shadowOpacity: 0.06, shadowRadius: 10, elevation: 2,
   },
   lastHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  lastLabel: { fontSize: 15, fontWeight: '800', color: C.ink },
-  lastDate: { fontSize: 12, color: C.inkSoft, fontWeight: '600', marginTop: 2 },
-  lastIcon: { fontSize: 22 },
-  lastSummary: { fontSize: 14, lineHeight: 20, color: C.ink, fontWeight: '500' },
-  lastActions: { flexDirection: 'row', gap: 10, marginTop: 14 },
-  noVisitHint: {
-    marginTop: 12, borderRadius: 14,
-    backgroundColor: C.surfaceSunk, borderWidth: 1, borderColor: C.line,
-    alignItems: 'center', justifyContent: 'center',
-    paddingHorizontal: 12, paddingVertical: 12,
+  lastLabel: { fontSize: 18, fontWeight: '800', color: C.ink },
+  lastDate: { fontSize: 16, color: C.inkSoft, fontWeight: '600', marginTop: 2 },
+  lastIcon: { fontSize: 26 },
+  lastSummary: { fontSize: 16, lineHeight: 24, color: C.ink, fontWeight: '500' },
+  lastActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  
+  noVisitHeroBtn: {
+    marginTop: 12, borderRadius: 16,
+    backgroundColor: C.primary,
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 16, paddingVertical: 16, gap: 12,
   },
-  noVisitHintText: { fontSize: 13, lineHeight: 18, color: C.inkSoft, textAlign: 'center', fontWeight: '600' },
+  noVisitHeroEmoji: { fontSize: 28 },
+  noVisitHeroTitle: { fontSize: 18, fontWeight: '900', color: '#FFF' },
+  noVisitHeroSub: { fontSize: 14, color: '#EAF4FF', fontWeight: '600', marginTop: 2 },
+  noVisitHeroArrow: { fontSize: 24, color: '#FFF', fontWeight: '900' },
+
   listenButton: {
     flex: 1, borderRadius: 14, backgroundColor: C.warmTint,
     alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: 12, paddingVertical: 12,
+    minHeight: 56,
   },
-  listenText: { fontSize: 14, fontWeight: '800', color: C.warm },
+  listenText: { fontSize: 16, fontWeight: '800', color: C.warm },
   listenButtonActive: { backgroundColor: C.warm },
   listenTextActive: { color: '#FFFFFF' },
   openButton: {
-    minWidth: 64, borderRadius: 14, backgroundColor: C.primaryTint,
+    minWidth: 80, borderRadius: 14, backgroundColor: C.primaryTint,
     alignItems: 'center', justifyContent: 'center', paddingVertical: 12,
+    minHeight: 56,
   },
-  openText: { fontSize: 14, fontWeight: '800', color: C.primaryStrong },
+  openText: { fontSize: 16, fontWeight: '800', color: C.primaryStrong },
   howToBtn: {
     marginTop: 16, alignSelf: 'center',
     borderRadius: 999, borderWidth: 1, borderColor: C.primaryTint,
     backgroundColor: C.surface,
-    paddingHorizontal: 18, paddingVertical: 12,
-    minHeight: 44, alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 22, paddingVertical: 14,
+    minHeight: 56, alignItems: 'center', justifyContent: 'center',
   },
-  howToText: { fontSize: 15, fontWeight: '900', color: C.primary, letterSpacing: 0.1 },
-  disclaimer: { marginTop: 14, fontSize: 12, lineHeight: 17, color: C.inkSoft, textAlign: 'center', fontWeight: '500', paddingHorizontal: 12 },
+  howToText: { fontSize: 16, fontWeight: '900', color: C.primary, letterSpacing: 0.1 },
+  disclaimer: { marginTop: 16, fontSize: 16, lineHeight: 22, color: C.inkSoft, textAlign: 'center', fontWeight: '600', paddingHorizontal: 12 },
 });

@@ -26,9 +26,8 @@ const C = {
   lineSoft: '#EFEBE0',
   ink: '#1A1B1F',
   ink2: '#2E3138',
-  inkSoft: '#555960',
-  inkMute: '#8A8E96',
-  inkFaint: '#B5B3AB',
+  inkSoft: '#4A4E54',
+  inkMute: '#666A73',
   primary: '#0F5BA8',
   primaryStrong: '#0A4682',
   primaryTint: '#DCEAF6',
@@ -140,7 +139,6 @@ export default function DashboardScreen() {
         .then((calls: CallRecord[]) => {
           setVisitCount(calls.length);
 
-          // Aggregate medications — dedupe by name (keep most recent)
           const medMap = new Map<string, MedEntry>();
           calls.forEach(c => {
             if (!c.summary?.medications) return;
@@ -153,7 +151,6 @@ export default function DashboardScreen() {
           });
           setMeds(Array.from(medMap.values()).sort((a, b) => b.fromDate - a.fromDate));
 
-          // Appointments
           const apptList: ApptEntry[] = [];
           calls.forEach(c => {
             if (c.summary?.appointmentTime) {
@@ -167,7 +164,6 @@ export default function DashboardScreen() {
           });
           setAppts(apptList.sort((a, b) => b.fromDate - a.fromDate));
 
-          // Insights — follow-up instructions from each visit
           const insightList: Insight[] = calls
             .filter(c => c.summary && (c.summary.followUpInstructions.length > 0 || c.summary.keyNumbers.length > 0))
             .map(c => ({
@@ -200,7 +196,6 @@ export default function DashboardScreen() {
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1 }}>
 
-        {/* App bar */}
         <View style={styles.appbar}>
           <View style={{ width: 44 }} />
           <View style={{ alignItems: 'center' }}>
@@ -210,33 +205,28 @@ export default function DashboardScreen() {
           <LanguagePill lang={lang} onToggle={toggle} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
-          {/* Stats row */}
           <View style={styles.statsRow}>
             {[
-              { label: t.statsVisits, value: visitCount, color: C.primary, tint: C.primaryTint },
-              { label: t.statsMeds, value: meds.length, color: C.warm, tint: C.warmTint },
-              { label: t.statsAppts, value: appts.length, color: C.listen, tint: C.listenTint },
-            ].map(({ label, value, color, tint }) => (
-              <View key={label} style={[styles.statTile, { backgroundColor: tint, borderColor: color + '33' }]}>
+              { label: t.statsVisits, value: visitCount, color: C.primary },
+              { label: t.statsMeds, value: meds.length, color: C.warm },
+              { label: t.statsAppts, value: appts.length, color: C.listen },
+            ].map(({ label, value, color }) => (
+              <View key={label} style={[styles.statCard]}>
                 <Text style={[styles.statValue, { color }]}>{value}</Text>
                 <Text style={styles.statLabel}>{label}</Text>
               </View>
             ))}
           </View>
 
-          {/* Medications */}
           <Section title={t.sectionMeds}>
             {meds.length === 0 ? (
               <EmptyCard emoji="💊" message={t.noMeds} />
             ) : (
-              <View style={styles.card}>
+              <View style={styles.medsList}>
                 {meds.map((m, i) => (
-                  <View key={i} style={[styles.medRow, i > 0 && styles.medRowBorder]}>
-                    <View style={styles.medIconWrap}>
-                      <Text style={{ fontSize: 18 }}>💊</Text>
-                    </View>
+                  <View key={i} style={styles.medRow}>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.medName}>{m.name}</Text>
                       <Text style={styles.medDose}>{m.dose}</Text>
@@ -253,7 +243,6 @@ export default function DashboardScreen() {
             )}
           </Section>
 
-          {/* Appointments */}
           <Section title={t.sectionAppts}>
             {appts.length === 0 ? (
               <EmptyCard emoji="📅" message={t.noAppts} />
@@ -273,20 +262,19 @@ export default function DashboardScreen() {
                       <Text style={styles.apptTime}>{a.time}</Text>
                       <Text style={styles.apptFrom}>{t.mentionedAt}{formatTimestamp(a.fromDate, lang)}</Text>
                     </View>
-                    <Text style={{ color: C.inkFaint, fontSize: 18 }}>›</Text>
+                    <Text style={{ color: C.inkMute, fontSize: 18 }}>›</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             )}
           </Section>
 
-          {/* Follow-up instructions */}
           <Section title={t.sectionInstructions}>
             {insights.length === 0 ? (
               <EmptyCard emoji="✅" message={t.noInstructions} />
             ) : (
               insights.map((ins, gi) => (
-                <View key={gi} style={[styles.card, gi > 0 && { marginTop: 8 }]}>
+                <View key={gi} style={[styles.card, gi > 0 && { marginTop: 16 }]}>
                   <TouchableOpacity
                     style={styles.insightHeader}
                     onPress={() => router.push({ pathname: '/summary', params: { id: ins.visitId } })}
@@ -299,17 +287,11 @@ export default function DashboardScreen() {
                     <Text style={styles.insightOverview}>{ins.rawText}</Text>
                   ) : null}
                   {ins.instructions.map((instr, ii) => (
-                    <View key={ii} style={styles.instrRow}>
+                    <View key={ii} style={[styles.instrRow, { padding: 16 }]}>
                       <View style={styles.instrNum}>
                         <Text style={styles.instrNumText}>{ii + 1}</Text>
                       </View>
                       <Text style={styles.instrText}>{instr}</Text>
-                    </View>
-                  ))}
-                  {ins.keyNumbers.map((num, ni) => (
-                    <View key={ni} style={styles.keyNumRow}>
-                      <Text style={styles.keyNumIcon}>📞</Text>
-                      <Text style={styles.keyNumText}>{num}</Text>
                     </View>
                   ))}
                 </View>
@@ -319,7 +301,7 @@ export default function DashboardScreen() {
 
           {visitCount === 0 && (
             <View style={styles.noVisitasCard}>
-              <Text style={styles.noVisitasEmoji}>🩺</Text>
+              <Text style={{ fontSize: 44 }}>🩺</Text>
               <Text style={styles.noVisitasTitle}>{t.noVisitsTitle}</Text>
               <Text style={styles.noVisitasSub}>{t.noVisitsSub}</Text>
               <TouchableOpacity style={styles.noVisitasCta} onPress={() => router.push('/dial')}>
@@ -327,8 +309,6 @@ export default function DashboardScreen() {
               </TouchableOpacity>
             </View>
           )}
-
-          <View style={{ height: 16 }} />
         </ScrollView>
         <BottomNav active="history" lang={lang} />
       </SafeAreaView>
@@ -340,55 +320,80 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: C.bg },
 
   appbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, height: 52 },
-  appbarBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.7)', borderWidth: 1, borderColor: C.lineSoft, alignItems: 'center', justifyContent: 'center' },
-  appbarSub: { fontSize: 10, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', color: C.inkMute },
-  appbarTitle: { fontSize: 16, fontWeight: '700', color: C.ink2 },
+  appbarTitle: { fontSize: 20, fontWeight: '900', color: C.ink, letterSpacing: -0.2 },
+  appbarSub: { fontSize: 16, color: C.inkSoft, fontWeight: '600' },
 
-  content: { paddingHorizontal: 16, paddingTop: 12 },
+  scrollContent: { paddingHorizontal: 16, paddingBottom: 110 },
 
-  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 4 },
-  statTile: { flex: 1, borderRadius: 18, borderWidth: 1, padding: 14, alignItems: 'center', gap: 3 },
-  statValue: { fontSize: 28, fontWeight: '700', letterSpacing: -0.5 },
-  statLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', color: C.inkMute },
+  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
+  statCard: {
+    flex: 1, backgroundColor: C.surface,
+    borderRadius: 18, borderWidth: 1, borderColor: C.line,
+    padding: 16, gap: 4,
+    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04, shadowRadius: 10, elevation: 2,
+  },
+  statValue: { fontSize: 32, fontWeight: '900', color: C.primary, letterSpacing: -1 },
+  statLabel: { fontSize: 14, fontWeight: '800', color: C.inkSoft, textTransform: 'uppercase', letterSpacing: 0.5 },
 
-  section: { marginTop: 20 },
-  sectionTitle: { fontSize: 13, fontWeight: '800', letterSpacing: 0.5, textTransform: 'uppercase', color: C.inkMute, marginBottom: 10 },
+  section: { marginTop: 24 },
+  sectionTitle: {
+    fontSize: 16, fontWeight: '900', color: C.inkMute,
+    letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 12, marginLeft: 4,
+  },
 
   card: { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 22, overflow: 'hidden', shadowColor: '#1E2850', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.07, shadowRadius: 12, elevation: 3 },
 
-  emptyCard: { backgroundColor: C.surfaceSunk, borderWidth: 1, borderColor: C.line, borderRadius: 18, padding: 24, alignItems: 'center' },
-  emptyCardText: { fontSize: 14, color: C.inkMute, textAlign: 'center', lineHeight: 20 },
+  emptyCard: {
+    backgroundColor: C.surfaceSunk, borderRadius: 16,
+    borderWidth: 1, borderColor: C.line, borderStyle: 'dashed',
+    padding: 24, alignItems: 'center', justifyContent: 'center',
+  },
+  emptyCardText: { fontSize: 16, color: C.inkSoft, fontWeight: '600' },
 
-  medRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16 },
-  medRowBorder: { borderTopWidth: 1, borderTopColor: C.lineSoft },
-  medIconWrap: { width: 40, height: 40, borderRadius: 12, backgroundColor: C.warmTint, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  medName: { fontSize: 16, fontWeight: '600', color: C.ink, letterSpacing: -0.1 },
-  medDose: { fontSize: 13, color: C.inkMute, marginTop: 2 },
-  medVisitBtn: { backgroundColor: C.primaryTint, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
-  medVisitBtnText: { fontSize: 12, fontWeight: '700', color: C.primaryStrong },
+  medsList: { gap: 10, marginBottom: 28 },
+  medRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: C.surface, borderRadius: 16, borderWidth: 1, borderColor: C.line,
+    padding: 16,
+  },
+  medName: { fontSize: 18, fontWeight: '900', color: C.ink },
+  medDose: { fontSize: 16, color: C.warm, fontWeight: '700', marginTop: 2 },
+  medVisitBtn: {
+    backgroundColor: C.primaryTint, borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 12, minHeight: 44, justifyContent: 'center',
+  },
+  medVisitBtnText: { fontSize: 16, fontWeight: '800', color: C.primaryStrong },
 
   apptRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 },
   apptRowBorder: { borderTopWidth: 1, borderTopColor: C.lineSoft },
   apptDotWrap: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   apptDot: { width: 10, height: 10, borderRadius: 5 },
-  apptTime: { fontSize: 16, fontWeight: '600', color: C.ink, letterSpacing: -0.1 },
-  apptFrom: { fontSize: 12, color: C.inkMute, marginTop: 2 },
+  apptTime: { fontSize: 18, fontWeight: '700', color: C.ink },
+  apptFrom: { fontSize: 14, color: C.inkSoft, marginTop: 2 },
 
   insightHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: C.lineSoft },
-  insightDate: { fontSize: 13, fontWeight: '700', color: C.ink },
-  insightOverview: { fontSize: 14, color: C.inkSoft, lineHeight: 20, paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.lineSoft },
-  instrRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 14, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: C.lineSoft },
-  instrNum: { width: 24, height: 24, borderRadius: 8, backgroundColor: C.primaryTint, alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 },
-  instrNumText: { fontSize: 11, fontWeight: '800', color: C.primaryStrong },
-  instrText: { flex: 1, fontSize: 15, color: C.ink2, lineHeight: 22 },
-  keyNumRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10 },
-  keyNumIcon: { fontSize: 16 },
-  keyNumText: { fontSize: 15, color: C.primary, fontWeight: '600' },
+  insightDate: { fontSize: 16, fontWeight: '800', color: C.ink },
+  insightOverview: { fontSize: 16, color: C.inkSoft, lineHeight: 24, paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.lineSoft },
+  instrRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  instrNum: {
+    width: 24, height: 24, borderRadius: 12,
+    backgroundColor: C.line,
+    alignItems: 'center', justifyContent: 'center', marginTop: 2,
+  },
+  instrNumText: { fontSize: 14, fontWeight: '900', color: C.inkSoft },
+  instrText: { flex: 1, fontSize: 16, lineHeight: 24, color: C.ink, fontWeight: '600' },
 
-  noVisitasCard: { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 22, padding: 28, alignItems: 'center', marginTop: 20, gap: 10 },
-  noVisitasEmoji: { fontSize: 44 },
-  noVisitasTitle: { fontSize: 20, fontWeight: '700', color: C.ink },
-  noVisitasSub: { fontSize: 14, color: C.inkSoft, textAlign: 'center', lineHeight: 20 },
-  noVisitasCta: { marginTop: 8, backgroundColor: C.primary, borderRadius: 99, paddingHorizontal: 24, paddingVertical: 14 },
-  noVisitasCtaText: { fontSize: 15, fontWeight: '800', color: '#fff' },
+  noVisitasCard: {
+    backgroundColor: C.surface, borderRadius: 20, borderWidth: 1, borderColor: C.line,
+    padding: 24, alignItems: 'center', justifyContent: 'center', gap: 12,
+    marginTop: 40,
+  },
+  noVisitasTitle: { fontSize: 20, fontWeight: '900', color: C.ink },
+  noVisitasSub: { fontSize: 16, color: C.inkSoft, textAlign: 'center', lineHeight: 22, fontWeight: '600' },
+  noVisitasCta: {
+    marginTop: 8, paddingHorizontal: 20, paddingVertical: 14, minHeight: 56,
+    backgroundColor: C.primary, borderRadius: 14, alignItems: 'center', justifyContent: 'center'
+  },
+  noVisitasCtaText: { color: '#FFF', fontSize: 16, fontWeight: '900' },
 });

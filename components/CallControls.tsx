@@ -17,7 +17,7 @@ const C = {
   surface: '#FFFFFF',
   line: '#E5DFD2',
   ink: '#1A1B1F',
-  inkMute: '#8A8E96',
+  inkMute: '#666A73',
   primary: '#0F5BA8',
   primaryStrong: '#0A4682',
   primaryTint: '#DCEAF6',

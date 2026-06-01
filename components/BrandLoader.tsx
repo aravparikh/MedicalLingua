@@ -10,9 +10,9 @@ interface Props {
 }
 
 const DIMS: Record<Size, { circle: number; dot: number; gap: number; emoji: number; labelGap: number; label: number }> = {
-  sm: { circle: 32, dot: 5, gap: 5, emoji: 16, labelGap: 8, label: 12 },
-  md: { circle: 52, dot: 7, gap: 6, emoji: 24, labelGap: 12, label: 14 },
-  lg: { circle: 72, dot: 9, gap: 8, emoji: 34, labelGap: 14, label: 15 },
+  sm: { circle: 32, dot: 5, gap: 5, emoji: 16, labelGap: 8, label: 16 },
+  md: { circle: 52, dot: 7, gap: 6, emoji: 24, labelGap: 12, label: 18 },
+  lg: { circle: 72, dot: 9, gap: 8, emoji: 34, labelGap: 14, label: 20 },
 };
 
 /**
@@ -69,7 +69,7 @@ export default function BrandLoader({ size = 'md', label, style }: Props) {
         <Text style={{ fontSize: d.emoji }}>🩺</Text>
       </Animated.View>
 
-      <View style={[s.dots, { gap: d.gap, marginTop: d.gap + 4 }]}>
+      <View style={[s.dots, { gap: d.gap, marginTop: d.gap + 4 }]} pointerEvents="none">
         {[dot1, dot2, dot3].map((v, i) => (
           <Animated.View
             key={i}

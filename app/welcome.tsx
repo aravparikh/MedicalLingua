@@ -21,7 +21,7 @@ const C = {
   ink: '#1A1B1F',
   ink2: '#2E3138',
   inkSoft: '#555960',
-  inkMute: '#8A8E96',
+  inkMute: '#666A73',
   primary: '#0F5BA8',
   primaryStrong: '#0A4682',
   primaryTint: '#DCEAF6',

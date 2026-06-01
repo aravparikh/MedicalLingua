@@ -127,13 +127,13 @@ const s = StyleSheet.create({
   scrollContent: { paddingHorizontal: 18, paddingBottom: 24, flexGrow: 1 },
 
   header: { minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  backBtn: { paddingVertical: 8, paddingRight: 8 },
-  backText: { fontSize: 15, color: C.primary, fontWeight: '700' },
-  headerTitle: { flex: 1, fontSize: 16, fontWeight: '800', color: C.ink, textAlign: 'center' },
+  backBtn: { minHeight: 48, paddingVertical: 8, paddingRight: 8, justifyContent: 'center' },
+  backText: { fontSize: 16, color: C.primary, fontWeight: '700' },
+  headerTitle: { flex: 1, fontSize: 18, fontWeight: '800', color: C.ink, textAlign: 'center' },
 
   hero: { paddingTop: 18, paddingBottom: 16 },
   title: { fontSize: 26, lineHeight: 32, fontWeight: '900', color: C.ink, letterSpacing: -0.4 },
-  subtitle: { fontSize: 15, lineHeight: 21, color: C.inkSoft, fontWeight: '500', marginTop: 8 },
+  subtitle: { fontSize: 16, lineHeight: 22, color: C.inkSoft, fontWeight: '500', marginTop: 8 },
 
   cards: { gap: 12 },
   primaryCard: {
@@ -143,20 +143,20 @@ const s = StyleSheet.create({
   iconBlue: { width: 56, height: 56, borderRadius: 18, backgroundColor: C.primaryTint, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
   iconWarm: { width: 52, height: 52, borderRadius: 16, backgroundColor: C.warmTint, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   emoji: { fontSize: 28 },
-  cardTitle: { fontSize: 20, fontWeight: '900', color: C.ink, marginBottom: 6 },
-  cardText: { fontSize: 14, lineHeight: 20, color: C.inkSoft, fontWeight: '500', marginBottom: 14 },
-  cardButton: { paddingVertical: 14, borderRadius: 16, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
-  cardButtonText: { fontSize: 15, fontWeight: '900', color: '#fff' },
+  cardTitle: { fontSize: 24, fontWeight: '900', color: C.ink, marginBottom: 6 },
+  cardText: { fontSize: 16, lineHeight: 22, color: C.inkSoft, fontWeight: '500', marginBottom: 14 },
+  cardButton: { minHeight: 56, paddingVertical: 14, borderRadius: 16, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
+  cardButtonText: { fontSize: 16, fontWeight: '900', color: '#fff' },
 
   phoneCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: C.surface, borderRadius: 22, borderWidth: 1, borderColor: C.line, padding: 16,
   },
-  phoneTitle: { fontSize: 17, fontWeight: '800', color: C.ink },
-  phoneText: { fontSize: 13, lineHeight: 18, color: C.inkSoft, fontWeight: '500', marginTop: 2 },
+  phoneTitle: { fontSize: 20, fontWeight: '800', color: C.ink },
+  phoneText: { fontSize: 16, lineHeight: 22, color: C.inkSoft, fontWeight: '500', marginTop: 2 },
   chev: { fontSize: 24, color: C.warm, fontWeight: '700' },
 
   truthCard: { marginTop: 20, backgroundColor: C.listenTint, borderRadius: 18, padding: 14, borderWidth: 1, borderColor: '#2F8F7333' },
-  truthTitle: { fontSize: 13, fontWeight: '900', color: C.listen, marginBottom: 4, letterSpacing: 0.3, textTransform: 'uppercase' },
-  truthText: { fontSize: 13, lineHeight: 18, color: C.ink, fontWeight: '500' },
+  truthTitle: { fontSize: 16, fontWeight: '900', color: C.listen, marginBottom: 4, letterSpacing: 0.3, textTransform: 'uppercase' },
+  truthText: { fontSize: 16, lineHeight: 22, color: C.ink, fontWeight: '500' },
 });

@@ -48,10 +48,7 @@ export default function TranscriptMessage({ entry, lang = 'es', onEdit }: Props)
   }, [entry.originalText]);
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
-      Animated.spring(slideAnim, { toValue: 0, friction: 8, tension: 40, useNativeDriver: true }),
-    ]).start();
+    Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }).start();
   }, []);
 
   function commitEdit() {
@@ -90,7 +87,7 @@ export default function TranscriptMessage({ entry, lang = 'es', onEdit }: Props)
       style={[
         styles.container,
         isProvider ? styles.containerProvider : styles.containerPatient,
-        { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
+        { opacity: fadeAnim },
       ]}
     >
       <View style={[styles.bubble, isProvider ? styles.bubbleProvider : styles.bubblePatient]}>
@@ -147,7 +144,7 @@ export default function TranscriptMessage({ entry, lang = 'es', onEdit }: Props)
                 onBlur={commitEdit}
                 placeholderTextColor="#8A8E96"
               />
-              <TouchableOpacity style={styles.doneBtn} onPress={commitEdit}>
+              <TouchableOpacity style={styles.doneBtn} onPress={commitEdit} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Text style={styles.doneBtnText}>{t.retranslate}</Text>
               </TouchableOpacity>
             </View>
@@ -194,7 +191,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   safetyVerifiedText: {
-    fontSize: 11, fontWeight: '900', color: '#256E58', letterSpacing: 0.3,
+    fontSize: 16, fontWeight: '900', color: '#256E58', letterSpacing: 0.3,
   },
   safetyStack: { gap: 8, marginBottom: 12 },
   safetyChip: {
@@ -202,17 +199,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 10,
   },
   safetyCaught: {
-    backgroundColor: '#FFF7DC', borderColor: '#E5CD7A',
-  },
-  safetyWarning: {
     backgroundColor: '#FCEBE7', borderColor: '#E2887C',
   },
-  safetyTitle: { fontSize: 13, fontWeight: '900', letterSpacing: 0.2, marginBottom: 4 },
-  safetyTitleCaught: { color: '#7A5E15' },
-  safetyTitleWarning: { color: '#B5443A' },
-  safetyDetail: { fontSize: 12, lineHeight: 17, fontWeight: '600' },
-  safetyDetailCaught: { color: '#7A5E15' },
-  safetyDetailWarning: { color: '#B5443A' },
+  safetyWarning: {
+    backgroundColor: '#FFF7DC', borderColor: '#E5CD7A',
+  },
+  safetyTitle: { fontSize: 16, fontWeight: '900', letterSpacing: 0.2, marginBottom: 4 },
+  safetyTitleCaught: { color: '#B5443A' },
+  safetyTitleWarning: { color: '#7A5E15' },
+  safetyDetail: { fontSize: 16, lineHeight: 22, fontWeight: '600' },
+  safetyDetailCaught: { color: '#B5443A' },
+  safetyDetailWarning: { color: '#7A5E15' },
   translatedText: {
     fontSize: 22,
     color: '#1A1B1F',
@@ -233,9 +230,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   originalLabel: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '800',
-    color: '#555960',
+    color: '#4A4E54',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -246,6 +243,7 @@ const styles = StyleSheet.create({
     color: '#2E3138',
     fontStyle: 'italic',
     lineHeight: 23,
+    textTransform: 'none',
   },
   editInputWrap: { gap: 8 },
   editInput: {

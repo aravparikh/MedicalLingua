@@ -143,7 +143,6 @@ export default function SummaryScreen() {
       .then(calls => {
         const found = calls.find(c => c.id === id) ?? null;
         setCall(found);
-        // Regenerate if no summary, OR if summary was created in a different language
         if (found && (!found.summary || (found.summary.lang && found.summary.lang !== lang))) {
           fetchSummary(found);
         }
@@ -180,7 +179,10 @@ export default function SummaryScreen() {
   async function fetchSummary(record: CallRecord) {
     setIsSummarizing(true);
     try {
-      const summary = await generateCallSummary(record.transcript, lang);
+      const summary = await Promise.race([
+        generateCallSummary(record.transcript, lang),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 12000))
+      ]);
       const updated = { ...record, summary };
       setCall(updated);
       await updateCall(updated);
@@ -377,18 +379,16 @@ function SummaryCards({ summary, lang }: { summary: CallSummary; lang: AppLangua
         {summary.simpleExplanation ? <Text style={s.explainText}>{summary.simpleExplanation}</Text> : null}
       </InfoCard>
 
-      <InfoCard emoji="💊" title={t.meds} tint={C.warmTint}>
-        {summary.medications.length ? (
-          summary.medications.map((med, index) => (
+      {summary.medications && summary.medications.length > 0 && (
+        <InfoCard emoji="💊" title={t.meds} tint={C.warmTint}>
+          {summary.medications.map((med, index) => (
             <View key={`${med.name}-${index}`} style={s.medRow}>
               <Text style={s.medName}>{med.name}</Text>
               <Text style={s.medDose}>{med.dose}</Text>
             </View>
-          ))
-        ) : (
-          <Text style={s.bigText}>{t.noMeds}</Text>
-        )}
-      </InfoCard>
+          ))}
+        </InfoCard>
+      )}
 
       <InfoCard emoji="📅" title={t.nextVisit} tint={C.primaryTint}>
         <Text style={s.bigText}>{summary.nextVisit || summary.appointmentTime || t.noNextVisit}</Text>
@@ -445,7 +445,7 @@ const s = StyleSheet.create({
   shareBtn: { flex: 1.2, minHeight: 60, borderRadius: 18, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 },
   shareText: { fontSize: 17, fontWeight: '900', color: '#fff', textAlign: 'center' },
   doctorBtn: {
-    minHeight: 56, borderRadius: 18,
+    minHeight: 60, borderRadius: 18,
     backgroundColor: '#0E1116',
     alignItems: 'center', justifyContent: 'center',
     marginBottom: 14,

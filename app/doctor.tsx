@@ -24,7 +24,7 @@ const C = {
   line: '#2A2F38',
   ink: '#F5F2EC',
   inkSoft: '#B8BCC6',
-  inkMute: '#8A8E96',
+  inkMute: '#666A73',
   primary: '#7BAEE3',
   primaryStrong: '#A8C9EE',
   primaryTint: '#1E3552',
@@ -217,21 +217,21 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 18, paddingVertical: 10,
   },
-  exitBtn: { paddingVertical: 8, paddingHorizontal: 6 },
-  exitText: { fontSize: 14, color: C.primaryStrong, fontWeight: '700' },
+  exitBtn: { minHeight: 48, justifyContent: 'center', paddingVertical: 8, paddingHorizontal: 6 },
+  exitText: { fontSize: 16, color: C.primaryStrong, fontWeight: '700' },
   modeChip: {
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999,
     backgroundColor: C.primaryTint, borderWidth: 1, borderColor: '#3A5A86',
   },
-  modeChipText: { fontSize: 11, fontWeight: '900', color: C.primaryStrong, letterSpacing: 0.8 },
+  modeChipText: { fontSize: 14, fontWeight: '900', color: C.primaryStrong, letterSpacing: 0.8 },
 
   content: { paddingHorizontal: 22, paddingBottom: 40 },
   kicker: {
-    fontSize: 12, fontWeight: '900', color: C.warm,
+    fontSize: 16, fontWeight: '900', color: C.warm,
     letterSpacing: 1.2, textTransform: 'uppercase', marginTop: 8, marginBottom: 6,
   },
   title: { fontSize: 32, fontWeight: '900', color: C.ink, letterSpacing: -0.6, lineHeight: 36 },
-  metaLine: { fontSize: 14, color: C.inkMute, fontWeight: '600', marginTop: 6, marginBottom: 22 },
+  metaLine: { fontSize: 16, color: C.inkMute, fontWeight: '600', marginTop: 6, marginBottom: 22 },
 
   alertCard: {
     backgroundColor: C.alertTint,
@@ -240,10 +240,10 @@ const s = StyleSheet.create({
     padding: 16,
     marginBottom: 18,
   },
-  alertHeader: { fontSize: 15, fontWeight: '900', color: C.alert, marginBottom: 8 },
+  alertHeader: { fontSize: 18, fontWeight: '900', color: C.alert, marginBottom: 8 },
   alertRow: { flexDirection: 'row', gap: 8, marginVertical: 2 },
-  alertBullet: { color: C.alert, fontWeight: '900', fontSize: 16 },
-  alertText: { flex: 1, fontSize: 14, lineHeight: 20, color: C.ink, fontWeight: '600' },
+  alertBullet: { color: C.alert, fontWeight: '900', fontSize: 18 },
+  alertText: { flex: 1, fontSize: 16, lineHeight: 22, color: C.ink, fontWeight: '600' },
   alertTextBold: { fontWeight: '900', color: C.ink },
 
   section: {
@@ -251,11 +251,11 @@ const s = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: C.line,
   },
   sectionTitle: {
-    fontSize: 12, fontWeight: '900', color: C.inkMute,
+    fontSize: 16, fontWeight: '900', color: C.inkMute,
     letterSpacing: 1.0, textTransform: 'uppercase', marginBottom: 8,
   },
-  sectionBody: { fontSize: 17, lineHeight: 25, color: C.ink, fontWeight: '600' },
-  sectionExtra: { fontSize: 14, lineHeight: 21, color: C.inkSoft, marginTop: 8, fontWeight: '500' },
+  sectionBody: { fontSize: 18, lineHeight: 26, color: C.ink, fontWeight: '600' },
+  sectionExtra: { fontSize: 16, lineHeight: 24, color: C.inkSoft, marginTop: 8, fontWeight: '500' },
 
   medRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
@@ -263,11 +263,11 @@ const s = StyleSheet.create({
     borderRadius: 12, padding: 12, marginBottom: 6,
     borderWidth: 1, borderColor: C.line,
   },
-  medName: { fontSize: 16, fontWeight: '900', color: C.ink, fontVariant: ['tabular-nums'] },
-  medDose: { fontSize: 14, fontWeight: '700', color: C.warm },
+  medName: { fontSize: 18, fontWeight: '900', color: C.ink, fontVariant: ['tabular-nums'] },
+  medDose: { fontSize: 16, fontWeight: '700', color: C.warm },
 
-  bullet: { fontSize: 15, lineHeight: 22, color: C.ink, fontWeight: '600', marginVertical: 2 },
-  emptyText: { fontSize: 14, color: C.inkMute, fontStyle: 'italic', fontWeight: '500' },
+  bullet: { fontSize: 16, lineHeight: 24, color: C.ink, fontWeight: '600', marginVertical: 2 },
+  emptyText: { fontSize: 16, color: C.inkMute, fontStyle: 'italic', fontWeight: '500' },
 
   qrCard: {
     marginTop: 22,
@@ -276,17 +276,17 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: C.line,
     padding: 20, alignItems: 'center', gap: 10,
   },
-  qrKicker: { fontSize: 11, fontWeight: '900', color: C.inkMute, letterSpacing: 1.0, textTransform: 'uppercase' },
+  qrKicker: { fontSize: 14, fontWeight: '900', color: C.inkMute, letterSpacing: 1.0, textTransform: 'uppercase' },
   qrFrame: {
     width: 220, height: 220, borderRadius: 18,
     backgroundColor: '#FFFFFF', padding: 10,
     alignItems: 'center', justifyContent: 'center',
   },
   qrImg: { width: 200, height: 200 },
-  qrCaption: { fontSize: 12, color: C.inkMute, textAlign: 'center', fontWeight: '600' },
+  qrCaption: { fontSize: 16, color: C.inkMute, textAlign: 'center', fontWeight: '600' },
 
   footer: {
-    fontSize: 11, color: C.inkMute, textAlign: 'center',
-    marginTop: 22, lineHeight: 16, fontWeight: '500',
+    fontSize: 14, color: C.inkMute, textAlign: 'center',
+    marginTop: 22, lineHeight: 20, fontWeight: '500',
   },
 });

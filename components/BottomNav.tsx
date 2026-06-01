@@ -14,7 +14,7 @@ const C = {
   surface: '#F4F1EB',
   line: '#E5DFD2',
   ink: '#1A1B1F',
-  inkMute: '#8A8E96',
+  inkMute: '#666A73',
   primary: '#0F5BA8',
   primaryStrong: '#0A4682',
   primaryTint: '#DCEAF6',
@@ -164,9 +164,11 @@ const s = StyleSheet.create({
   tab: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 3,
-    paddingVertical: 2,
+    paddingVertical: 4,
     minWidth: 56,
+    minHeight: 56,
   },
   tabIconWrap: {
     width: 44,
@@ -182,8 +184,8 @@ const s = StyleSheet.create({
     fontSize: 20,
   },
   tabLabel: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
     color: C.inkMute,
     letterSpacing: 0.1,
   },
@@ -219,7 +221,7 @@ const s = StyleSheet.create({
     fontSize: 26,
   },
   fabLabel: {
-    fontSize: 10,
+    fontSize: 14,
     fontWeight: '900',
     color: C.primary,
     letterSpacing: 0.2,
