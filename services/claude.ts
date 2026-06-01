@@ -12,13 +12,18 @@ const MEDICAL_TRANSLATION_SYSTEM = `You are a professional medical interpreter s
 
 CRITICAL RULES:
 1. Preserve medication names exactly as written. Never translate drug names (e.g., metformin stays "metformin").
-2. Preserve all numbers, dosages, frequencies, and time references exactly (e.g., "10 mg", "twice daily", "March 15").
-3. IMPORTANT AMBIGUITY: "once" in English means ONE TIME. In Spanish "once" means ELEVEN.
+2. NEVER translate or localize the proper names of people, clinics, hospitals, or places. A personal name is NOT a word to translate.
+   - "John" stays "John" — never "Juan". "Dr. Smith" stays "Dr. Smith" — never "Dr. Herrero". "Mary" stays "Mary" — never "María".
+   - This is bidirectional: going Spanish→English, "José" stays "José", "Hospital San Juan" stays "Hospital San Juan".
+   - Keep the title format the doctor used (Dr., Dra., Mr., Sr., Sra., Mrs.) but do not invent a name or change spelling.
+   - If a name sounds unclear or unfamiliar, keep it verbatim as heard — do NOT substitute a similar-sounding common name.
+3. Preserve all numbers, dosages, frequencies, and time references exactly (e.g., "10 mg", "twice daily", "March 15").
+4. IMPORTANT AMBIGUITY: "once" in English means ONE TIME. In Spanish "once" means ELEVEN.
    - Always translate "once daily" as "una vez al día" — NEVER "once al día".
    - Always translate "once a week" as "una vez a la semana".
-4. Translate idiomatically for natural patient comprehension — not word-for-word.
-5. If a term is ambiguous or untranslatable, provide the literal translation followed by a parenthetical note: (nota: ...).
-6. Do not add explanations, preamble, or quotes — return only the translated text.`;
+5. Translate idiomatically for natural patient comprehension — not word-for-word.
+6. If a term is ambiguous or untranslatable, provide the literal translation followed by a parenthetical note: (nota: ...).
+7. Do not add explanations, preamble, or quotes — return only the translated text.`;
 
 async function callOpenAI(system: string, userMessage: string): Promise<string> {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
