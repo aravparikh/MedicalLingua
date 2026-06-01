@@ -13,20 +13,7 @@ import LanguagePill from '../components/LanguagePill';
 import { useLanguage } from '../hooks/useLanguage';
 import { hapticLight, hapticMedium } from '../utils/haptics';
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  inkSoft: '#555960',
-  primary: '#0F5BA8',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmTint: '#F3E2D2',
-  listen: '#2F8F73',
-  listenTint: '#DCEAE2',
-};
-
+import { Theme as C, Shadows } from '../constants/theme';
 const L = {
   es: {
     back: 'Inicio',
@@ -68,7 +55,7 @@ export default function DialScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       <SafeAreaView style={s.safe}>
         <ScrollView contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
           <View style={s.header}>
@@ -138,7 +125,7 @@ const s = StyleSheet.create({
   cards: { gap: 12 },
   primaryCard: {
     backgroundColor: C.surface, borderRadius: 22, borderWidth: 1, borderColor: C.line, padding: 18,
-    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.07, shadowRadius: 12, elevation: 3,
+    shadowColor: '#1E293B', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.07, shadowRadius: 12, elevation: 3,
   },
   iconBlue: { width: 56, height: 56, borderRadius: 18, backgroundColor: C.primaryTint, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
   iconWarm: { width: 52, height: 52, borderRadius: 16, backgroundColor: C.warmTint, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
@@ -156,7 +143,7 @@ const s = StyleSheet.create({
   phoneText: { fontSize: 16, lineHeight: 22, color: C.inkSoft, fontWeight: '500', marginTop: 2 },
   chev: { fontSize: 24, color: C.warm, fontWeight: '700' },
 
-  truthCard: { marginTop: 20, backgroundColor: C.listenTint, borderRadius: 18, padding: 14, borderWidth: 1, borderColor: '#2F8F7333' },
+  truthCard: { marginTop: 20, backgroundColor: C.listenTint, borderRadius: 18, padding: 14, borderWidth: 1, borderColor: '#0D948833' },
   truthTitle: { fontSize: 16, fontWeight: '900', color: C.listen, marginBottom: 4, letterSpacing: 0.3, textTransform: 'uppercase' },
   truthText: { fontSize: 16, lineHeight: 22, color: C.ink, fontWeight: '500' },
 });

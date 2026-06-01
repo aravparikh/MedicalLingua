@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   Image,
   SafeAreaView,
   ScrollView,
@@ -11,31 +10,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import BrandLoader from '../components/BrandLoader';
 import { generateCallSummary } from '../services/claude';
 import { loadCalls } from '../services/storage';
 import type { CallRecord, CallSummary } from '../types';
 import { formatDuration, formatTimestamp } from '../utils/format';
 import { hapticLight } from '../utils/haptics';
 
-const C = {
-  bg: '#0E1116',
-  surface: '#171B22',
-  surfaceSunk: '#11141A',
-  line: '#2A2F38',
-  ink: '#F5F2EC',
-  inkSoft: '#B8BCC6',
-  inkMute: '#666A73',
-  primary: '#7BAEE3',
-  primaryStrong: '#A8C9EE',
-  primaryTint: '#1E3552',
-  warm: '#E9AC7E',
-  warmTint: '#3A2A1E',
-  alert: '#E08B7F',
-  alertTint: '#3A1F1B',
-  listen: '#7FCBA5',
-  listenTint: '#1F3A2A',
-};
-
+import { Theme as C, Shadows } from '../constants/theme';
 export default function DoctorView() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -75,14 +57,14 @@ export default function DoctorView() {
 
   // Deep link the doctor can scan with their phone to mirror this view
   const deepLink = id ? `medlingua://visit/${id}` : 'medlingua://visit';
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&color=0F5BA8&bgcolor=FFFFFF&data=${encodeURIComponent(deepLink)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&color=2563EB&bgcolor=FFFFFF&data=${encodeURIComponent(deepLink)}`;
 
   if (!call || loading) {
     return (
       <View style={s.screen}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle="dark-content" />
         <SafeAreaView style={s.center}>
-          <ActivityIndicator color={C.primary} size="large" />
+          <BrandLoader size="lg" />
           <Text style={s.loadingText}>Preparing for the doctor…</Text>
         </SafeAreaView>
       </View>
@@ -93,7 +75,7 @@ export default function DoctorView() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1 }}>
         <View style={s.topBar}>
           <TouchableOpacity

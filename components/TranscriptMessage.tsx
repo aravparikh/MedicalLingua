@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import type { TranscriptEntry } from '../types';
+import { Theme as C, Shadows } from '../constants/theme';
 
 type Lang = 'es' | 'en';
 
@@ -142,7 +143,7 @@ export default function TranscriptMessage({ entry, lang = 'es', onEdit }: Props)
                 onSubmitEditing={commitEdit}
                 blurOnSubmit
                 onBlur={commitEdit}
-                placeholderTextColor="#8A8E96"
+                placeholderTextColor="#667085"
               />
               <TouchableOpacity style={styles.doneBtn} onPress={commitEdit} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Text style={styles.doneBtnText}>{t.retranslate}</Text>
@@ -171,15 +172,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderWidth: 1,
+    ...Shadows.glass,
   },
   bubbleProvider: {
-    backgroundColor: '#DCEAF6',
-    borderColor: '#0F5BA855',
+    backgroundColor: C.primaryTint,
+    borderColor: C.primary,
     borderBottomRightRadius: 6,
   },
   bubblePatient: {
-    backgroundColor: '#DCEAE2',
-    borderColor: '#2F8F7355',
+    backgroundColor: C.listenTint,
+    borderColor: C.listen,
     borderBottomLeftRadius: 6,
   },
   safetyVerifiedRow: {
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   safetyVerifiedText: {
-    fontSize: 16, fontWeight: '900', color: '#256E58', letterSpacing: 0.3,
+    fontSize: 16, fontWeight: '900', color: '#0F766E', letterSpacing: 0.3,
   },
   safetyStack: { gap: 8, marginBottom: 12 },
   safetyChip: {
@@ -205,14 +207,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF7DC', borderColor: '#E5CD7A',
   },
   safetyTitle: { fontSize: 16, fontWeight: '900', letterSpacing: 0.2, marginBottom: 4 },
-  safetyTitleCaught: { color: '#B5443A' },
+  safetyTitleCaught: { color: '#DC2626' },
   safetyTitleWarning: { color: '#7A5E15' },
   safetyDetail: { fontSize: 16, lineHeight: 22, fontWeight: '600' },
-  safetyDetailCaught: { color: '#B5443A' },
+  safetyDetailCaught: { color: '#DC2626' },
   safetyDetailWarning: { color: '#7A5E15' },
   translatedText: {
     fontSize: 22,
-    color: '#1A1B1F',
+    color: C.ink,
     fontWeight: '800',
     lineHeight: 30,
     letterSpacing: 0.3,
@@ -220,7 +222,7 @@ const styles = StyleSheet.create({
   },
   originalContainer: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(26, 27, 31, 0.12)',
+    borderTopColor: C.line,
     paddingTop: 10,
   },
   originalLabelRow: {
@@ -232,7 +234,7 @@ const styles = StyleSheet.create({
   originalLabel: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#4A4E54',
+    color: C.inkMute,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -240,7 +242,7 @@ const styles = StyleSheet.create({
   editIcon: { fontSize: 18 },
   originalText: {
     fontSize: 16,
-    color: '#2E3138',
+    color: C.ink2,
     fontStyle: 'italic',
     lineHeight: 23,
     textTransform: 'none',
@@ -248,7 +250,7 @@ const styles = StyleSheet.create({
   editInputWrap: { gap: 8 },
   editInput: {
     fontSize: 16,
-    color: '#1A1B1F',
+    color: C.ink,
     fontStyle: 'italic',
     lineHeight: 20,
     borderWidth: 1,
@@ -256,7 +258,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#FFFFFFAA',
+    backgroundColor: C.surfaceSolid,
     minHeight: 60,
   },
   doneBtn: {
@@ -271,7 +273,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(48, 209, 88, 0.4)',
   },
   doneBtnText: {
-    color: '#2F8F73',
+    color: '#0D9488',
     fontSize: 16,
     fontWeight: '800',
     letterSpacing: 0.3,

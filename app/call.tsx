@@ -31,17 +31,7 @@ import { hapticLight, hapticWarning } from '../utils/haptics';
 import { getReadAloudDefault } from '../services/preferences';
 import { scanForSafetyFlags } from '../utils/safetyScan';
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  ink2: '#2E3138',
-  inkMute: '#666A73',
-  inkFaint: '#B5B3AB',
-  primary: '#0F5BA8',
-  primaryTint: '#DCEAF6',
-};
+import { Theme as C } from '../constants/theme';
 
 const L = {
   es: {
@@ -409,7 +399,7 @@ export default function CallScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       <SafeAreaView style={{ flex: 1 }}>
 
         <DisclaimerBanner lang={lang} />
@@ -522,14 +512,14 @@ const s = StyleSheet.create({
   },
   homeBtnText: { fontSize: 16, color: C.primary, fontWeight: '900' },
   privacyBadge: {
-    backgroundColor: '#DCEAE2',
+    backgroundColor: '#D5F3EF',
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: '#2F8F7333',
+    borderColor: '#0D948833',
   },
-  privacyText: { fontSize: 14, color: '#2F8F73', fontWeight: '800' },
+  privacyText: { fontSize: 14, color: '#0D9488', fontWeight: '800' },
   phoneModeCard: {
     marginHorizontal: 16,
     marginBottom: 8,
@@ -554,7 +544,7 @@ const s = StyleSheet.create({
   emptyTitle: { fontSize: 28, fontWeight: '900', color: C.ink, marginBottom: 8 },
   emptySub: { fontSize: 20, color: C.ink2, textAlign: 'center', lineHeight: 28, fontWeight: '600' },
   emptyBold: { fontWeight: '800', color: C.primary },
-  emptyBoldWarm: { fontWeight: '800', color: '#B66A3E' },
+  emptyBoldWarm: { fontWeight: '800', color: '#C2410C' },
 
   statsRow: { flexDirection: 'row', gap: 10, marginTop: 28 },
   statTile: {

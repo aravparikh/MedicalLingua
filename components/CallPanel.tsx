@@ -2,23 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { hapticLight, hapticWarning } from '../utils/haptics';
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  line: '#E5DFD2',
-  lineSoft: '#EFEBE0',
-  ink: '#1A1B1F',
-  ink2: '#2E3138',
-  inkMute: '#666A73',
-  inkFaint: '#B5B3AB',
-  primary: '#0F5BA8',
-  primaryStrong: '#0A4682',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmTint: '#F3E2D2',
-  alert: '#B5443A',
-  alertTint: '#F4DDD8',
-};
+import { Theme as C, Shadows } from '../constants/theme';
 
 type Lang = 'es' | 'en';
 
@@ -208,11 +192,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 12,
-    shadowColor: '#1E2850',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 4,
+    ...Shadows.glass,
   },
 
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },

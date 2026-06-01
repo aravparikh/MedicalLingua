@@ -12,19 +12,7 @@ import {
 import AudioWaveform from './AudioWaveform';
 import { hapticMedium } from '../utils/haptics';
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  inkMute: '#666A73',
-  primary: '#0F5BA8',
-  primaryStrong: '#0A4682',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmStrong: '#8E5028',
-  warmTint: '#F3E2D2',
-};
+import { Theme as C, Shadows } from '../constants/theme';
 
 type Lang = 'es' | 'en';
 
@@ -177,7 +165,7 @@ const s = StyleSheet.create({
     paddingTop: 12,
     backgroundColor: C.bg,
     borderTopWidth: 1,
-    borderTopColor: '#E5DFD2',
+    borderTopColor: '#E2E8F1',
   },
   waveformRow: {
     alignItems: 'center', justifyContent: 'center',
@@ -195,9 +183,8 @@ const s = StyleSheet.create({
     flex: 1, borderRadius: 20, padding: 18, minHeight: 126,
     alignItems: 'center', gap: 4,
     borderWidth: 1.5,
-    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08, shadowRadius: 8, elevation: 3,
     overflow: 'visible',
+    ...Shadows.glass,
   },
   btnDoctor: { backgroundColor: C.surface, borderColor: C.primaryTint },
   btnPatient: { backgroundColor: C.surface, borderColor: C.warmTint },

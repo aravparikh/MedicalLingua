@@ -24,26 +24,7 @@ import { scanForSafetyFlags } from '../utils/safetyScan';
 import type { SafetyFlag } from '../types';
 import { hapticLight, hapticMedium, hapticSuccess } from '../utils/haptics';
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  surfaceSunk: '#FAF7F1',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  ink2: '#2E3138',
-  inkSoft: '#555960',
-  inkMute: '#666A73',
-  primary: '#0F5BA8',
-  primaryStrong: '#0A4682',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmTint: '#F3E2D2',
-  listen: '#2F8F73',
-  listenTint: '#DCEAE2',
-  alert: '#B5443A',
-  alertTint: '#F4DDD8',
-};
-
+import { Theme as C, Shadows } from '../constants/theme';
 type Lang = 'es' | 'en';
 
 const L = {
@@ -169,7 +150,7 @@ export default function CompareScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       <SafeAreaView style={{ flex: 1 }}>
         <View style={s.topBar}>
           <TouchableOpacity
@@ -336,7 +317,7 @@ const s = StyleSheet.create({
     backgroundColor: C.surface,
     borderRadius: 20, borderWidth: 1, borderColor: C.line,
     padding: 14, gap: 12,
-    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#1E293B', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06, shadowRadius: 12, elevation: 3,
   },
   input: {
@@ -352,7 +333,7 @@ const s = StyleSheet.create({
     shadowColor: C.primary, shadowOpacity: 0.28, shadowRadius: 12, shadowOffset: { width: 0, height: 6 },
     elevation: 5,
   },
-  runBtnDisabled: { backgroundColor: '#B5B3AB', shadowOpacity: 0 },
+  runBtnDisabled: { backgroundColor: '#98A2B3', shadowOpacity: 0 },
   runText: { fontSize: 18, color: '#FFF', fontWeight: '900', letterSpacing: 0.3 },
 
   presets: { marginTop: 22, gap: 8 },
@@ -373,7 +354,7 @@ const s = StyleSheet.create({
   compareCard: {
     borderRadius: 22, borderWidth: 1.5,
     padding: 16, gap: 12,
-    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 6 },
+    shadowColor: '#1E293B', shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.08, shadowRadius: 14, elevation: 4,
   },
   googleCard: { backgroundColor: '#FCEBE7', borderColor: '#E2887C' },
@@ -398,7 +379,7 @@ const s = StyleSheet.create({
   cardBadge: {
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
   },
-  googleBadge: { backgroundColor: '#B5443A' },
+  googleBadge: { backgroundColor: '#DC2626' },
   googleBadgeText: { fontSize: 12, color: '#FFF', fontWeight: '900', letterSpacing: 0.5 },
   mlBadge: { backgroundColor: C.listen },
   mlBadgeText: { fontSize: 12, color: '#FFF', fontWeight: '900', letterSpacing: 0.5 },
@@ -415,12 +396,12 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(181, 68, 58, 0.12)',
     borderWidth: 1, borderColor: 'rgba(181, 68, 58, 0.3)',
   },
-  flagBannerText: { fontSize: 16, color: '#B5443A', fontWeight: '900' },
+  flagBannerText: { fontSize: 16, color: '#DC2626', fontWeight: '900' },
   safeBanner: {
     backgroundColor: 'rgba(47, 143, 115, 0.16)',
     borderColor: 'rgba(47, 143, 115, 0.35)',
   },
-  safeBannerText: { fontSize: 16, color: '#256E58', fontWeight: '900' },
+  safeBannerText: { fontSize: 16, color: '#0F766E', fontWeight: '900' },
 
   flagsList: { gap: 8 },
   flagItem: {
@@ -428,7 +409,7 @@ const s = StyleSheet.create({
     borderRadius: 12, padding: 12,
     borderLeftWidth: 4, borderLeftColor: C.listen,
   },
-  flagItemTitle: { fontSize: 16, fontWeight: '900', color: '#256E58', marginBottom: 4 },
+  flagItemTitle: { fontSize: 16, fontWeight: '900', color: '#0F766E', marginBottom: 4 },
   flagItemDetail: { fontSize: 16, lineHeight: 22, color: C.ink2, fontWeight: '600' },
 
   shareBtn: {

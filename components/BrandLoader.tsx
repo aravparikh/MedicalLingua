@@ -95,14 +95,14 @@ export default function BrandLoader({ size = 'md', label, style }: Props) {
 const s = StyleSheet.create({
   wrap: { alignItems: 'center', justifyContent: 'center' },
   circle: {
-    backgroundColor: '#DCEAF6',
+    backgroundColor: '#E6EDFF',
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#0F5BA8', shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#2563EB', shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 4 },
   },
   dots: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-  dot: { backgroundColor: '#0F5BA8' },
+  dot: { backgroundColor: '#2563EB' },
   label: {
-    fontWeight: '800', color: '#555960', letterSpacing: 0.2,
+    fontWeight: '800', color: '#475067', letterSpacing: 0.2,
     textAlign: 'center', maxWidth: 240,
   },
 });

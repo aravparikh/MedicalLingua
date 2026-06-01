@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { hapticLight } from '../utils/haptics';
+import { Theme as C, Shadows } from '../constants/theme';
 
 type Lang = 'es' | 'en';
 
@@ -62,21 +63,22 @@ const s = StyleSheet.create({
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: C.surface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5DFD2',
+    borderColor: C.line,
     paddingHorizontal: 14,
     paddingVertical: 10,
     gap: 10,
+    ...Shadows.glass,
   },
   icon: { fontSize: 16 },
-  text: { flex: 1, fontSize: 16, color: '#555960', lineHeight: 22, fontWeight: '700' },
+  text: { flex: 1, fontSize: 16, color: C.ink2, lineHeight: 22, fontWeight: '700' },
   bold: { fontWeight: '800' },
   closeBtn: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#F4F1EB',
+    backgroundColor: C.surfaceSolid,
     alignItems: 'center', justifyContent: 'center',
   },
-  closeText: { fontSize: 16, fontWeight: '800', color: '#555960' },
+  closeText: { fontSize: 16, fontWeight: '800', color: C.inkMute },
 });

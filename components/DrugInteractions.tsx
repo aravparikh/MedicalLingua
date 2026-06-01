@@ -33,48 +33,34 @@ const L = {
   },
 };
 
-const C = {
-  surface: '#FFFFFF',
-  surfaceSunk: '#FAF7F1',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  inkSoft: '#555960',
-  inkMute: '#666A73',
-  primary: '#0F5BA8',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmTint: '#F3E2D2',
-  listen: '#2F8F73',
-  listenTint: '#DCEAE2',
-};
-
+import { Theme as C, Shadows } from '../constants/theme';
 const SEV_PALETTE = {
   major: {
-    bg: '#FCEBE7',
-    border: '#B5443A',
-    accent: '#B5443A',
-    chip: '#B5443A',
+    bg: 'rgba(226, 136, 124, 0.1)',
+    border: 'rgba(226, 136, 124, 0.3)',
+    accent: '#FCA5A5',
+    chip: 'rgba(181, 68, 58, 0.5)',
     icon: '🛑',
   },
   moderate: {
-    bg: '#FFF1E1',
-    border: '#B66A3E',
-    accent: '#8E5028',
-    chip: '#B66A3E',
+    bg: 'rgba(226, 176, 124, 0.1)',
+    border: 'rgba(226, 176, 124, 0.3)',
+    accent: '#FDBA74',
+    chip: 'rgba(182, 106, 62, 0.5)',
     icon: '⚠️',
   },
   minor: {
-    bg: '#F4F1EB',
-    border: '#555960',
-    accent: '#2E3138',
-    chip: '#555960',
+    bg: C.surfaceSunk,
+    border: C.line,
+    accent: C.inkMute,
+    chip: C.surfaceSolid,
     icon: '🟡',
   },
   info: {
-    bg: '#E6F0FB',
-    border: '#0F5BA8',
-    accent: '#0A4682',
-    chip: '#0F5BA8',
+    bg: 'rgba(168, 197, 229, 0.1)',
+    border: 'rgba(168, 197, 229, 0.3)',
+    accent: '#93C5FD',
+    chip: 'rgba(15, 91, 168, 0.5)',
     icon: 'ℹ️',
   },
 };
@@ -130,7 +116,7 @@ export default function DrugInteractions({ loading, interactions, lang = 'es' }:
             <Text style={s.safeIcon}>✓</Text>
             <View style={{ flex: 1 }}>
               <Text style={[s.cardTitle, { color: C.listen }]}>{t.safe}</Text>
-              <Text style={[s.cardAction, { color: '#256E58' }]}>{t.safeSub}</Text>
+              <Text style={[s.cardAction, { color: '#0F766E' }]}>{t.safeSub}</Text>
             </View>
           </View>
         )}
@@ -171,14 +157,10 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.line,
     overflow: 'hidden',
-    shadowColor: '#1E2850',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.06,
-    shadowRadius: 14,
-    elevation: 3,
+    ...Shadows.glass,
   },
   wrapAlert: {
-    shadowColor: '#B5443A',
+    shadowColor: '#DC2626',
     shadowOpacity: 0.18,
   },
   header: {
@@ -196,7 +178,7 @@ const s = StyleSheet.create({
   chip: {
     backgroundColor: C.listenTint,
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
-    borderWidth: 1, borderColor: '#2F8F7333',
+    borderWidth: 1, borderColor: '#0D948833',
   },
   chipText: { fontSize: 12, fontWeight: '900', color: C.listen, letterSpacing: 0.4, textTransform: 'uppercase' },
   subtitle: { fontSize: 16, lineHeight: 22, color: C.inkSoft, fontWeight: '600', marginTop: 4 },

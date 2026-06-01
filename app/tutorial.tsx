@@ -15,23 +15,7 @@ import { useLanguage } from '../hooks/useLanguage';
 import { setTutorialSeen } from '../services/preferences';
 import { hapticLight, hapticSuccess } from '../utils/haptics';
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  ink2: '#2E3138',
-  inkSoft: '#555960',
-  inkMute: '#666A73',
-  primary: '#0F5BA8',
-  primaryStrong: '#0A4682',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmTint: '#F3E2D2',
-  listen: '#2F8F73',
-  listenTint: '#DCEAE2',
-};
-
+import { Theme as C, Shadows } from '../constants/theme';
 type Lang = 'es' | 'en';
 
 interface Slide {
@@ -153,7 +137,7 @@ export default function TutorialScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       <SafeAreaView style={{ flex: 1 }}>
         <View style={s.topBar}>
           <Text style={s.progressText}>{t.progress(index + 1, slides.length)}</Text>
@@ -250,7 +234,7 @@ const s = StyleSheet.create({
   },
   tipCard: {
     backgroundColor: C.warmTint, borderRadius: 18,
-    borderWidth: 1, borderColor: '#B66A3E33',
+    borderWidth: 1, borderColor: '#C2410C33',
     paddingHorizontal: 18, paddingVertical: 14,
     alignSelf: 'stretch',
   },

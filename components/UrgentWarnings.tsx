@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import type { UrgentWarning } from '../types';
+import { Theme as C, Shadows } from '../constants/theme';
 
 type Lang = 'es' | 'en';
 
@@ -23,26 +24,26 @@ const L = {
 
 const PALETTES = {
   critical: {
-    bg: '#FCEBE7',
-    border: '#E2887C',
-    accent: '#B5443A',
-    chipBg: '#B5443A',
+    bg: 'rgba(226, 136, 124, 0.1)',
+    border: 'rgba(226, 136, 124, 0.3)',
+    accent: '#FCA5A5',
+    chipBg: 'rgba(181, 68, 58, 0.5)',
     chipText: '#FFFFFF',
     icon: '🚨',
   },
   high: {
-    bg: '#FFF1E1',
-    border: '#E2B07C',
-    accent: '#8E5028',
-    chipBg: '#B66A3E',
+    bg: 'rgba(226, 176, 124, 0.1)',
+    border: 'rgba(226, 176, 124, 0.3)',
+    accent: '#FDBA74',
+    chipBg: 'rgba(182, 106, 62, 0.5)',
     chipText: '#FFFFFF',
     icon: '⚠️',
   },
   info: {
-    bg: '#E6F0FB',
-    border: '#A8C5E5',
-    accent: '#0A4682',
-    chipBg: '#0F5BA8',
+    bg: 'rgba(168, 197, 229, 0.1)',
+    border: 'rgba(168, 197, 229, 0.3)',
+    accent: '#93C5FD',
+    chipBg: 'rgba(15, 91, 168, 0.5)',
     chipText: '#FFFFFF',
     icon: 'ℹ️',
   },
@@ -122,25 +123,21 @@ const s = StyleSheet.create({
     marginVertical: 12,
     borderRadius: 24,
     overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: C.surface,
     borderWidth: 1,
-    borderColor: '#E5DFD2',
-    shadowColor: '#B5443A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 5,
+    borderColor: C.line,
+    ...Shadows.glass,
   },
   headerRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: C.surfaceSolid,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0E4DF',
+    borderBottomColor: C.line,
   },
   headerIcon: { fontSize: 28 },
-  headerTitle: { fontSize: 19, fontWeight: '900', color: '#1A1B1F', letterSpacing: -0.2 },
-  headerSubtitle: { fontSize: 13, color: '#555960', fontWeight: '600', marginTop: 2 },
+  headerTitle: { fontSize: 19, fontWeight: '900', color: C.ink, letterSpacing: -0.2 },
+  headerSubtitle: { fontSize: 13, color: C.inkMute, fontWeight: '600', marginTop: 2 },
 
   list: { padding: 12, gap: 10 },
   card: {

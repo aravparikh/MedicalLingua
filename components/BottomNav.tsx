@@ -9,19 +9,7 @@ import {
 } from 'react-native';
 import { hapticLight, hapticMedium } from '../utils/haptics';
 
-const C = {
-  bg: '#FFFFFF',
-  surface: '#F4F1EB',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  inkMute: '#666A73',
-  primary: '#0F5BA8',
-  primaryStrong: '#0A4682',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmTint: '#F3E2D2',
-  listen: '#2F8F73',
-};
+import { Theme as C, Shadows } from '../constants/theme';
 
 export type NavTab = 'home' | 'history' | 'compare' | 'settings';
 
@@ -139,17 +127,18 @@ function TabButton({
 
 const s = StyleSheet.create({
   wrapper: {
-    backgroundColor: C.surface,
-    borderTopWidth: 1,
-    borderTopColor: C.line,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 24 : 16,
+    left: 16,
+    right: 16,
+    borderRadius: 32,
+    backgroundColor: C.surfaceSolid,
+    borderWidth: 1,
+    borderColor: C.line,
+    paddingBottom: 8,
     paddingTop: 8,
     paddingHorizontal: 8,
-    shadowColor: '#1E2850',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.07,
-    shadowRadius: 16,
-    elevation: 12,
+    ...Shadows.glass,
   },
   bar: {
     flexDirection: 'row',
@@ -208,14 +197,10 @@ const s = StyleSheet.create({
     backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -22,
-    shadowColor: C.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 10,
+    marginTop: -28,
     borderWidth: 3,
-    borderColor: C.surface,
+    borderColor: C.bg,
+    ...Shadows.glowPrimary,
   },
   fabEmoji: {
     fontSize: 26,

@@ -12,7 +12,7 @@ interface Props {
  * dB readings are roughly -160 (silent) to 0 (loud).
  * We map -50..0 → 0..1 and render that many bars at varying heights.
  */
-export default function AudioWaveform({ active, color = '#0F5BA8', bars = 24 }: Props) {
+export default function AudioWaveform({ active, color = '#2563EB', bars = 24 }: Props) {
   // Each bar gets its own animated height value
   const heights = useRef<Animated.Value[]>(
     Array.from({ length: bars }, () => new Animated.Value(0.15))

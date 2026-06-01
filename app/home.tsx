@@ -21,24 +21,8 @@ import { createDemoCall } from '../utils/demo';
 import { formatTimestamp } from '../utils/format';
 import { hapticLight, hapticMedium, hapticSuccess } from '../utils/haptics';
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  surfaceSunk: '#FAF7F1',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  ink2: '#2E3138',
-  inkSoft: '#4A4E54',
-  inkMute: '#666A73',
-  primary: '#0F5BA8',
-  primaryStrong: '#0A4682',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmStrong: '#8E5028',
-  warmTint: '#F3E2D2',
-  listen: '#2F8F73',
-  listenTint: '#DCEAE2',
-};
+import { Theme as C, Shadows } from '../constants/theme';
+
 
 const L = {
   es: {
@@ -254,7 +238,7 @@ export default function HomeScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       <SafeAreaView style={s.safe}>
         <ScrollView
           contentContainerStyle={s.scrollContent}
@@ -462,12 +446,12 @@ const s = StyleSheet.create({
   kickerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, gap: 10 },
   kicker: { fontSize: 16, fontWeight: '900', color: C.warm, letterSpacing: 0.4, textTransform: 'uppercase' },
   poweredPill: {
-    paddingHorizontal: 10, paddingVertical: 6,
+    paddingHorizontal: 12, paddingVertical: 6,
     borderRadius: 999,
-    borderWidth: 1, borderColor: C.line,
-    backgroundColor: C.surface,
+    borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.3)',
+    backgroundColor: C.primaryTint,
   },
-  poweredText: { fontSize: 14, fontWeight: '900', color: C.inkMute, letterSpacing: 0.6 },
+  poweredText: { fontSize: 13, fontWeight: '800', color: C.primary, letterSpacing: 0.6 },
   title: { fontSize: 30, lineHeight: 35, fontWeight: '900', color: C.ink, letterSpacing: -0.6 },
   subtitle: { fontSize: 17, lineHeight: 24, color: C.inkSoft, marginTop: 10, fontWeight: '500' },
 
@@ -478,8 +462,7 @@ const s = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 1, borderColor: C.line,
     padding: 16,
-    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05, shadowRadius: 10, elevation: 2,
+    ...Shadows.glass,
   },
   diffStripTitle: {
     fontSize: 16, fontWeight: '900', color: C.inkMute,
@@ -507,8 +490,7 @@ const s = StyleSheet.create({
     backgroundColor: C.surface,
     borderRadius: 18, borderWidth: 1, borderColor: C.line,
     gap: 8,
-    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
+    ...Shadows.glass,
   },
   quickIcon: {
     width: 44, height: 44, borderRadius: 12,
@@ -523,14 +505,14 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 14,
     borderRadius: 22, backgroundColor: C.surface,
     borderWidth: 1, borderColor: C.line, padding: 16,
-    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06, shadowRadius: 10, elevation: 2,
+    ...Shadows.glass,
   },
   modeCardPrimary: {
     flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center',
     padding: 20, gap: 4,
-    backgroundColor: C.primary, borderColor: C.primary,
-    shadowColor: C.primary, shadowOpacity: 0.22, shadowRadius: 18, elevation: 6,
+    backgroundColor: C.primaryTint, borderColor: C.primaryStrong,
+    borderWidth: 1,
+    ...Shadows.glowPrimary,
   },
   modeIconPrimary: {
     width: 52, height: 52, borderRadius: 16,
@@ -558,8 +540,7 @@ const s = StyleSheet.create({
   lastCard: {
     marginTop: 18, backgroundColor: C.surface,
     borderRadius: 22, borderWidth: 1, borderColor: C.line, padding: 16,
-    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06, shadowRadius: 10, elevation: 2,
+    ...Shadows.glass,
   },
   lastHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
   lastLabel: { fontSize: 18, fontWeight: '800', color: C.ink },

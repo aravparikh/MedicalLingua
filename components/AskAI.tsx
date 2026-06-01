@@ -50,24 +50,7 @@ const L = {
   },
 };
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  surfaceSunk: '#FAF7F1',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  ink2: '#2E3138',
-  inkSoft: '#555960',
-  inkMute: '#666A73',
-  primary: '#0F5BA8',
-  primaryStrong: '#0A4682',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmTint: '#F3E2D2',
-  alert: '#B5443A',
-  alertTint: '#F4DDD8',
-};
-
+import { Theme as C, Shadows } from '../constants/theme';
 interface Props {
   call: CallRecord;
   lang: Lang;
@@ -250,7 +233,7 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.line,
     overflow: 'hidden',
-    shadowColor: '#1E2850',
+    shadowColor: '#1E293B',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.08,
     shadowRadius: 14,
@@ -275,7 +258,7 @@ const s = StyleSheet.create({
   chip: {
     backgroundColor: C.warmTint,
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
-    borderWidth: 1, borderColor: '#B66A3E33',
+    borderWidth: 1, borderColor: '#C2410C33',
   },
   chipText: { fontSize: 12, fontWeight: '900', color: C.warm, letterSpacing: 0.4, textTransform: 'uppercase' },
   subtitle: { fontSize: 16, lineHeight: 22, color: C.inkSoft, fontWeight: '600', marginTop: 4 },
@@ -349,6 +332,6 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     shadowColor: C.primary, shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 },
   },
-  sendBtnDisabled: { backgroundColor: '#B5B3AB', shadowOpacity: 0 },
+  sendBtnDisabled: { backgroundColor: '#98A2B3', shadowOpacity: 0 },
   sendText: { fontSize: 20, color: '#fff', fontWeight: '900' },
 });

@@ -28,28 +28,7 @@ import {
 import { clearAllCalls, loadCalls } from '../services/storage';
 import { hapticLight, hapticMedium, hapticSuccess, hapticWarning, refreshHapticsPreference } from '../utils/haptics';
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  surfaceSunk: '#FAF7F1',
-  line: '#E5DFD2',
-  lineSoft: '#EFEBE0',
-  ink: '#1A1B1F',
-  ink2: '#2E3138',
-  inkSoft: '#555960',
-  inkMute: '#666A73',
-  inkFaint: '#B5B3AB',
-  primary: '#0F5BA8',
-  primaryStrong: '#0A4682',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmTint: '#F3E2D2',
-  listen: '#2F8F73',
-  listenTint: '#DCEAE2',
-  alert: '#B5443A',
-  alertTint: '#F4DDD8',
-};
-
+import { Theme as C, Shadows } from '../constants/theme';
 type Lang = 'es' | 'en';
 
 const L = {
@@ -277,7 +256,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       <SafeAreaView style={{ flex: 1 }}>
         <View style={s.topBar}>
           <View style={{ width: 44 }} />
@@ -530,7 +509,7 @@ const s = StyleSheet.create({
     backgroundColor: C.surface,
     borderRadius: 18, borderWidth: 1, borderColor: C.line,
     overflow: 'hidden',
-    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#1E293B', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05, shadowRadius: 10, elevation: 2,
   },
   divider: { height: 1, backgroundColor: C.lineSoft, marginLeft: 64 },
@@ -556,7 +535,7 @@ const s = StyleSheet.create({
 
   activeChip: {
     backgroundColor: C.listenTint, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999,
-    borderWidth: 1, borderColor: '#2F8F7333',
+    borderWidth: 1, borderColor: '#0D948833',
   },
   activeChipText: { fontSize: 11, fontWeight: '900', color: C.listen, letterSpacing: 0.4 },
   soonChip: {
@@ -606,7 +585,7 @@ const s = StyleSheet.create({
   testBtn: {
     minHeight: 44, borderRadius: 12,
     backgroundColor: C.warmTint,
-    borderWidth: 1, borderColor: '#B66A3E33',
+    borderWidth: 1, borderColor: '#C2410C33',
     alignItems: 'center', justifyContent: 'center',
     marginTop: 2,
   },

@@ -92,23 +92,7 @@ const L = {
   },
 };
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  surfaceSunk: '#FAF7F1',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  inkSoft: '#555960',
-  primary: '#0F5BA8',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmTint: '#F3E2D2',
-  listen: '#2F8F73',
-  listenTint: '#DCEAE2',
-  alert: '#B5443A',
-  alertTint: '#F4DDD8',
-};
-
+import { Theme as C, Shadows } from '../constants/theme';
 function safeList(items: string[] | undefined, fallback: string) {
   return items?.length ? items : [fallback];
 }
@@ -459,7 +443,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     marginBottom: 6,
   },
-  deleteBtnText: { fontSize: 14, fontWeight: '800', color: '#B5443A', letterSpacing: 0.2 },
+  deleteBtnText: { fontSize: 14, fontWeight: '800', color: '#DC2626', letterSpacing: 0.2 },
   stack: { gap: 12 },
   infoCard: { flexDirection: 'row', gap: 14, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 24, padding: 18 },
   infoIcon: { width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },

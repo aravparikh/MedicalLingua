@@ -13,24 +13,7 @@ import {
 import { hasSeenTutorial, setPreferredLanguage, type AppLanguage } from '../services/preferences';
 import { hapticSuccess } from '../utils/haptics';
 
-const C = {
-  bg: '#F4F1EB',
-  surface: '#FFFFFF',
-  surfaceSunk: '#FAF7F1',
-  line: '#E5DFD2',
-  ink: '#1A1B1F',
-  ink2: '#2E3138',
-  inkSoft: '#555960',
-  inkMute: '#666A73',
-  primary: '#0F5BA8',
-  primaryStrong: '#0A4682',
-  primaryTint: '#DCEAF6',
-  warm: '#B66A3E',
-  warmTint: '#F3E2D2',
-  listen: '#2F8F73',
-  listenTint: '#DCEAE2',
-};
-
+import { Theme as C, Shadows } from '../constants/theme';
 export default function WelcomeScreen() {
   const router = useRouter();
 
@@ -87,7 +70,7 @@ export default function WelcomeScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       <SafeAreaView style={s.safe}>
         <View style={s.heroSection}>
           {/* Pulsing halo behind the logo */}
@@ -214,7 +197,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 5,
     borderRadius: 999,
     backgroundColor: C.primaryTint,
-    borderWidth: 1, borderColor: '#0F5BA822',
+    borderWidth: 1, borderColor: '#2563EB22',
     marginBottom: 22,
   },
   tagPillText: { fontSize: 12, fontWeight: '900', color: C.primaryStrong, letterSpacing: 0.6, textTransform: 'uppercase' },
@@ -233,7 +216,7 @@ const s = StyleSheet.create({
     borderRadius: 26,
     borderWidth: 1, borderColor: C.line,
     padding: 18, gap: 12,
-    shadowColor: '#1E2850', shadowOffset: { width: 0, height: 12 },
+    shadowColor: '#1E293B', shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.10, shadowRadius: 24, elevation: 6,
   },
   question: {
@@ -265,7 +248,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 20,
     backgroundColor: C.warmTint,
-    borderWidth: 1, borderColor: '#B66A3E33',
+    borderWidth: 1, borderColor: '#C2410C33',
   },
   secondaryButtonText: { fontSize: 18, fontWeight: '900', color: C.warm, letterSpacing: -0.2 },
   secondarySub: { fontSize: 13, color: C.inkSoft, marginTop: 2, fontWeight: '700' },
