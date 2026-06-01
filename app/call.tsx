@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { Audio } from 'expo-av';
+import { Ionicons } from '@expo/vector-icons';
 import CallControls from '../components/CallControls';
 import CallPanel from '../components/CallPanel';
 import DisclaimerBanner from '../components/DisclaimerBanner';
@@ -448,14 +449,9 @@ export default function CallScreen() {
           isListening={isListening}
           isSpeaking={isSpeaking}
           callStartedAt={callStartedAt}
-          dialedNumber={number || ''}
-          isMuted={isMuted}
-          isSpeaker={isSpeaker}
           lang={lang}
           onShowHelp={showCallHelp}
           onEndCall={handleEndCall}
-          onToggleMute={toggleMute}
-          onToggleSpeaker={toggleSpeaker}
         />
 
         <ScrollView
@@ -467,7 +463,7 @@ export default function CallScreen() {
           {transcript.length === 0 && (
             <View style={s.empty}>
               <View style={s.emptyIconWrap}>
-                <Text style={{ fontSize: 32 }}>🌐</Text>
+                <Ionicons name="globe-outline" size={34} color={C.primary} />
               </View>
               <Text style={s.emptyTitle}>{t.emptyTitle}</Text>
               <Text style={s.emptySub}>

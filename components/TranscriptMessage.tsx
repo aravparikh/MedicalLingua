@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Animated, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import type { TranscriptEntry } from '../types';
 import { Theme as C, Shadows } from '../constants/theme';
 
@@ -12,8 +13,7 @@ const L = {
     youSaidEs: 'Lo que usted dijo (ES)',
     youSaidTranslatedEn: 'Traducción al inglés',
     retranslate: 'Re-traducir',
-    safetyVerified: '🛡️ Seguridad verificada',
-    caughtError: 'Detectamos un error peligroso',
+    safetyVerified: 'Seguridad verificada',
     warningLabel: 'Atención',
   },
   en: {
@@ -22,8 +22,7 @@ const L = {
     youSaidEs: 'Patient original (ES)',
     youSaidTranslatedEn: 'English translation',
     retranslate: 'Re-translate',
-    safetyVerified: '🛡️ Safety verified',
-    caughtError: 'We caught a dangerous error',
+    safetyVerified: 'Safety verified',
     warningLabel: 'Heads up',
   },
 };
@@ -39,7 +38,6 @@ export default function TranscriptMessage({ entry, lang = 'es', onEdit }: Props)
   const t = L[lang];
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(20)).current;
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(entry.originalText);
@@ -59,13 +57,6 @@ export default function TranscriptMessage({ entry, lang = 'es', onEdit }: Props)
       onEdit?.(entry.id, trimmed);
     }
   }
-
-  // For patient entries:
-  //   originalText = what they said in Spanish
-  //   translatedText = English translation shown to doctor
-  // For provider entries:
-  //   originalText = what they said in English
-  //   translatedText = Spanish translation played to patient
 
   // Figure out which text is in Spanish vs English
   const spanishText = isProvider ? entry.translatedText : entry.originalText;
@@ -102,9 +93,17 @@ export default function TranscriptMessage({ entry, lang = 'es', onEdit }: Props)
                   key={i}
                   style={[styles.safetyChip, isCaught ? styles.safetyCaught : styles.safetyWarning]}
                 >
-                  <Text style={[styles.safetyTitle, isCaught ? styles.safetyTitleCaught : styles.safetyTitleWarning]}>
-                    {isCaught ? `🛡️  ${flag.title}` : `⚠️  ${flag.title}`}
-                  </Text>
+                  <View style={styles.safetyTitleRow}>
+                    <Ionicons
+                      name={isCaught ? 'shield-checkmark' : 'warning-outline'}
+                      size={18}
+                      color={isCaught ? C.alert : '#B91C1C'}
+                      style={{ marginRight: 6 }}
+                    />
+                    <Text style={[styles.safetyTitle, isCaught ? styles.safetyTitleCaught : styles.safetyTitleWarning]}>
+                      {flag.title}
+                    </Text>
+                  </View>
                   <Text style={[styles.safetyDetail, isCaught ? styles.safetyDetailCaught : styles.safetyDetailWarning]}>
                     {flag.detail}
                   </Text>
@@ -114,6 +113,7 @@ export default function TranscriptMessage({ entry, lang = 'es', onEdit }: Props)
           </View>
         ) : (
           <View style={styles.safetyVerifiedRow}>
+            <Ionicons name="shield-checkmark" size={14} color="#0F766E" style={{ marginRight: 4 }} />
             <Text style={styles.safetyVerifiedText}>{t.safetyVerified}</Text>
           </View>
         )}
@@ -126,8 +126,13 @@ export default function TranscriptMessage({ entry, lang = 'es', onEdit }: Props)
           <View style={styles.originalLabelRow}>
             <Text style={styles.originalLabel}>{smallLabel}</Text>
             {smallIsEditable && !editing && (
-              <TouchableOpacity style={styles.editButton} onPress={() => setEditing(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Text style={styles.editIcon}>✏️</Text>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => setEditing(true)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="create-outline" size={16} color={C.warm} />
               </TouchableOpacity>
             )}
           </View>
@@ -164,66 +169,86 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     flexDirection: 'row',
   },
-  containerProvider: { justifyContent: 'flex-end' },
-  containerPatient: { justifyContent: 'flex-start' },
+  containerProvider: { justifyContent: 'flex-start' }, // Doctor: aligned left
+  containerPatient: { justifyContent: 'flex-end' },   // Patient (user): aligned right
+  
   bubble: {
-    maxWidth: '90%',
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    maxWidth: '85%',
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     borderWidth: 1,
     ...Shadows.glass,
   },
   bubbleProvider: {
-    backgroundColor: C.primaryTint,
+    backgroundColor: C.primaryTint, // doctor blue tint
     borderColor: C.primary,
-    borderBottomRightRadius: 6,
+    borderBottomLeftRadius: 4, // tail on left
   },
   bubblePatient: {
-    backgroundColor: C.listenTint,
-    borderColor: C.listen,
-    borderBottomLeftRadius: 6,
+    backgroundColor: C.warmTint, // patient orange tint (matching mic colors)
+    borderColor: C.warm,
+    borderBottomRightRadius: 4, // tail on right
   },
+  
   safetyVerifiedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(47, 143, 115, 0.12)',
-    borderWidth: 1, borderColor: 'rgba(47, 143, 115, 0.35)',
-    paddingHorizontal: 9, paddingVertical: 4,
+    backgroundColor: 'rgba(47, 143, 115, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(47, 143, 115, 0.25)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 999,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   safetyVerifiedText: {
-    fontSize: 16, fontWeight: '900', color: '#0F766E', letterSpacing: 0.3,
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#0F766E',
+    letterSpacing: 0.2,
   },
-  safetyStack: { gap: 8, marginBottom: 12 },
+  
+  safetyStack: { gap: 6, marginBottom: 10 },
   safetyChip: {
-    borderRadius: 12, borderWidth: 1.5,
-    paddingHorizontal: 12, paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   safetyCaught: {
-    backgroundColor: '#FCEBE7', borderColor: '#E2887C',
+    backgroundColor: '#FCEBE7',
+    borderColor: '#E2887C',
   },
   safetyWarning: {
-    backgroundColor: '#FFF7DC', borderColor: '#E5CD7A',
+    backgroundColor: '#FFF7DC',
+    borderColor: '#E5CD7A',
   },
-  safetyTitle: { fontSize: 16, fontWeight: '900', letterSpacing: 0.2, marginBottom: 4 },
-  safetyTitleCaught: { color: '#DC2626' },
-  safetyTitleWarning: { color: '#7A5E15' },
-  safetyDetail: { fontSize: 16, lineHeight: 22, fontWeight: '600' },
-  safetyDetailCaught: { color: '#DC2626' },
-  safetyDetailWarning: { color: '#7A5E15' },
+  safetyTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  safetyTitle: { fontSize: 14, fontWeight: '900', letterSpacing: 0.2 },
+  safetyTitleCaught: { color: C.alert },
+  safetyTitleWarning: { color: '#B91C1C' },
+  safetyDetail: { fontSize: 14, lineHeight: 19, fontWeight: '600' },
+  safetyDetailCaught: { color: C.alert },
+  safetyDetailWarning: { color: '#B91C1C' },
+  
   translatedText: {
-    fontSize: 22,
+    fontSize: 18,
     color: C.ink,
-    fontWeight: '800',
-    lineHeight: 30,
-    letterSpacing: 0.3,
-    marginBottom: 12,
+    fontWeight: '700',
+    lineHeight: 25,
+    letterSpacing: 0.2,
+    marginBottom: 8,
   },
   originalContainer: {
     borderTopWidth: 1,
-    borderTopColor: C.line,
-    paddingTop: 10,
+    borderTopColor: 'rgba(0,0,0,0.06)',
+    paddingTop: 8,
   },
   originalLabelRow: {
     flexDirection: 'row',
@@ -232,50 +257,53 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   originalLabel: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: '800',
     color: C.inkMute,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  editButton: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
-  editIcon: { fontSize: 18 },
+  editButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   originalText: {
-    fontSize: 16,
-    color: C.ink2,
+    fontSize: 14,
+    color: C.inkSoft,
     fontStyle: 'italic',
-    lineHeight: 23,
-    textTransform: 'none',
+    lineHeight: 20,
   },
   editInputWrap: { gap: 8 },
   editInput: {
-    fontSize: 16,
+    fontSize: 14,
     color: C.ink,
     fontStyle: 'italic',
-    lineHeight: 20,
+    lineHeight: 18,
     borderWidth: 1,
-    borderColor: 'rgba(48, 209, 88, 0.5)',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderColor: C.warm,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     backgroundColor: C.surfaceSolid,
-    minHeight: 60,
+    minHeight: 50,
   },
   doneBtn: {
     alignSelf: 'flex-end',
-    backgroundColor: 'rgba(48, 209, 88, 0.2)',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    minHeight: 44,
+    backgroundColor: C.warmTint,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    minHeight: 36,
     justifyContent: 'center',
-    paddingVertical: 7,
+    paddingVertical: 6,
     borderWidth: 1,
-    borderColor: 'rgba(48, 209, 88, 0.4)',
+    borderColor: C.warm,
   },
   doneBtnText: {
-    color: '#0D9488',
-    fontSize: 16,
+    color: C.warm,
+    fontSize: 13,
     fontWeight: '800',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
 });
