@@ -171,7 +171,7 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1 }}>
 
         <View style={styles.appbar}>

@@ -399,7 +399,7 @@ export default function CallScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1 }}>
 
         <DisclaimerBanner lang={lang} />

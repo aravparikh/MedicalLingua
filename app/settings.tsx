@@ -256,7 +256,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1 }}>
         <View style={s.topBar}>
           <View style={{ width: 44 }} />
