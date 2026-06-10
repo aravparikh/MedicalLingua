@@ -16,7 +16,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import BottomNav from '../components/BottomNav';
 import LanguagePill from '../components/LanguagePill';
 import { useLanguage } from '../hooks/useLanguage';
 import { translateNaive, translateToSpanish } from '../services/claude';
@@ -150,7 +149,7 @@ export default function CompareScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1 }}>
         <View style={s.topBar}>
           <TouchableOpacity
@@ -285,7 +284,6 @@ export default function CompareScreen() {
             <View style={{ height: 16 }} />
           </ScrollView>
         </KeyboardAvoidingView>
-        <BottomNav active="compare" lang={lang} />
       </SafeAreaView>
     </View>
   );

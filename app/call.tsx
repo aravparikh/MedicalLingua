@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { Audio } from 'expo-av';
+import { Ionicons } from '@expo/vector-icons';
 import CallControls from '../components/CallControls';
 import CallPanel from '../components/CallPanel';
 import DisclaimerBanner from '../components/DisclaimerBanner';
@@ -206,10 +207,33 @@ export default function CallScreen() {
     ExpoSpeech.stop();
   }
 
+  // Build name hints + same-language context from the conversation so far, so
+  // Whisper spells proper names consistently instead of mangling them.
+  function buildWhisperHints(audioLang: 'en' | 'es') {
+    const entries = transcriptRef.current;
+    // Proper-noun-ish tokens (Capitalized words 2+ chars) across BOTH languages —
+    // a name should carry over even when the other speaker says it.
+    const nameSet = new Set<string>();
+    for (const e of entries) {
+      const matches = `${e.originalText} ${e.translatedText}`.match(/\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{1,}\b/g);
+      if (matches) for (const m of matches) nameSet.add(m);
+    }
+    // Drop common sentence-start words that are capitalized but aren't names.
+    const STOP = new Set(['The','You','Your','Please','Take','Do','Does','How','What','When','Then','This','That','And','But','For','Are','Is','We','Hello','Hi','Okay','Yes','No','El','La','Los','Las','Usted','Por','Para','Como','Cuando','Que','Hola','Sí','Buenos','Buenas','Doctor','Doctora']);
+    const hints = [...nameSet].filter(w => !STOP.has(w)).slice(-12);
+    // Same-language prior speech for spelling/term consistency.
+    const sameLangRole = audioLang === 'en' ? 'provider' : 'patient';
+    const priorContext = entries
+      .filter(e => e.role === sameLangRole)
+      .map(e => e.originalText)
+      .join(' ');
+    return { hints, priorContext };
+  }
+
   async function processProviderChunk(uri: string) {
     setPendingRole('provider');
     try {
-      const englishText = await transcribeAudio(uri, 'en');
+      const englishText = await transcribeAudio(uri, 'en', buildWhisperHints('en'));
       if (!englishText.trim()) { setPendingRole(null); return; }
       const spanishText = await translateToSpanish(englishText);
       const safetyFlags = scanForSafetyFlags(englishText, 'en-es');
@@ -295,7 +319,7 @@ export default function CallScreen() {
     if ((rec as any)._doneTimer) clearTimeout((rec as any)._doneTimer);
     try {
       const uri = await stopRecording(rec);
-      const spanishText = await transcribeAudio(uri, 'es');
+      const spanishText = await transcribeAudio(uri, 'es', buildWhisperHints('es'));
       if (!spanishText.trim()) { setIsProcessing(false); setPendingRole(null); return; }
       const englishText = await translateToEnglish(spanishText);
       const safetyFlags = scanForSafetyFlags(spanishText, 'es-en');
@@ -399,7 +423,7 @@ export default function CallScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1 }}>
 
         <DisclaimerBanner lang={lang} />
@@ -425,14 +449,9 @@ export default function CallScreen() {
           isListening={isListening}
           isSpeaking={isSpeaking}
           callStartedAt={callStartedAt}
-          dialedNumber={number || ''}
-          isMuted={isMuted}
-          isSpeaker={isSpeaker}
           lang={lang}
           onShowHelp={showCallHelp}
           onEndCall={handleEndCall}
-          onToggleMute={toggleMute}
-          onToggleSpeaker={toggleSpeaker}
         />
 
         <ScrollView
@@ -444,7 +463,7 @@ export default function CallScreen() {
           {transcript.length === 0 && (
             <View style={s.empty}>
               <View style={s.emptyIconWrap}>
-                <Text style={{ fontSize: 32 }}>🌐</Text>
+                <Ionicons name="globe-outline" size={34} color={C.primary} />
               </View>
               <Text style={s.emptyTitle}>{t.emptyTitle}</Text>
               <Text style={s.emptySub}>

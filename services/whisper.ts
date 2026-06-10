@@ -18,14 +18,43 @@ function getApiKey(): string {
   return key;
 }
 
+export interface TranscribeOptions {
+  /** Known proper names to bias recognition toward (patient, doctor, family). */
+  hints?: string[];
+  /** Recent transcript text in the SAME language as this audio, for spelling/term consistency. */
+  priorContext?: string;
+}
+
+/**
+ * Builds Whisper's `prompt`. Whisper biases its output toward the spelling and
+ * vocabulary present in this prompt, so feeding it the names and recent context
+ * is the single most effective way to stop it from mangling proper nouns.
+ * Whisper only honors ~224 tokens of prompt, so we keep it tight.
+ */
+function buildPrompt(opts?: TranscribeOptions): string {
+  const parts: string[] = ['Medical interpreter conversation between a doctor and patient.'];
+  const hints = (opts?.hints ?? []).filter(Boolean);
+  if (hints.length) {
+    // Listing the names primes Whisper to spell them this exact way.
+    parts.push(`Names mentioned: ${hints.slice(0, 12).join(', ')}.`);
+  }
+  if (opts?.priorContext?.trim()) {
+    // Last bit of prior speech keeps spelling/terminology consistent chunk-to-chunk.
+    parts.push(opts.priorContext.trim().slice(-220));
+  }
+  return parts.join(' ');
+}
+
 /**
  * Transcribes an audio file URI to text.
  * @param uri   Local file URI returned by Expo AV (e.g. file:///...)
  * @param language  'en' for provider audio, 'es' for patient audio
+ * @param opts  Optional name hints + prior context to bias recognition (esp. names).
  */
 export async function transcribeAudio(
   uri: string,
-  language: 'en' | 'es'
+  language: 'en' | 'es',
+  opts?: TranscribeOptions
 ): Promise<string> {
   const apiKey = getApiKey();
 
@@ -49,7 +78,7 @@ export async function transcribeAudio(
   body.append('language', language);
   body.append('response_format', 'text');
   body.append('temperature', '0');
-  body.append('prompt', 'Medical conversation transcript. Do not invent speech. Ignore silence.');
+  body.append('prompt', buildPrompt(opts));
 
   const response = await fetch(WHISPER_URL, {
     method: 'POST',

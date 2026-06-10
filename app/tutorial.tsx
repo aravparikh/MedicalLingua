@@ -137,7 +137,7 @@ export default function TutorialScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1 }}>
         <View style={s.topBar}>
           <Text style={s.progressText}>{t.progress(index + 1, slides.length)}</Text>

@@ -70,7 +70,7 @@ export default function WelcomeScreen() {
 
   return (
     <View style={s.screen}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView style={s.safe}>
         <View style={s.heroSection}>
           {/* Pulsing halo behind the logo */}
